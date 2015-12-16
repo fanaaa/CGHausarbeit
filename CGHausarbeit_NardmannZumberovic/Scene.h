@@ -9,20 +9,26 @@
 #ifndef Scene_h
 #define Scene_h
 
-#include <stdio.h>
+using namespace std;
+
+
 #include "vector.h"
 #include "Texture.h"
 #include "Object.h"
+
 class Scene{
 public:
     Vector size;
     Texture wallpaper;
+    const char* filename;
     int u;
     int v;
     Object objekts;
     
-    Scene();
+    Scene(const char* Filename);
     ~Scene();
-    bool parseFile(const char* Filename);
+private:
+    bool parseFile();
+    bool saveFile();
 };
-#endif /* Scene_hpp */
+#endif /* Scene_h */

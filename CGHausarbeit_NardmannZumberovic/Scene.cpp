@@ -7,16 +7,23 @@
 //
 
 #include "Scene.h"
-#include <stdio>
+#include <cstdio>
+#include <string>
+#include <fstream>
+#include <iostream>
+#include <float.h>
 
-Scene::Scene(){
+using namespace std;
+
+Scene::Scene(const char* Filename){
 }
 
 Scene::~Scene(){
 }
 
-bool Scene::parseFile(const char *Filename){
-    FILE * object = fopen(Filename, "r");
+bool Scene::parseFile(){
+    int result;
+    FILE * object = fopen(this->filename, "r");
     if(object == NULL){
         cout << "Konnte Datei nicht oeffnen!" << endl;
         cout << getcwd(NULL, 0) << endl;
@@ -34,46 +41,38 @@ bool Scene::parseFile(const char *Filename){
                     if(strcmp(lineHeader,"size") == 0){
                         Vector size;
                         fscanf(object, "%f %f %f\n", &size.X,&size.Y,&size.Z);
-                        v.push_back(vertex); //anders speichern
+                        // v.push_back(size); //anders speichern
                     }
                     else if(strcmp(lineHeader, "wallpaper") == 0){
                         if(strcmp(lineHeader, "texture") == 0){
-                            fscanf(lineHeader, "");
+                            string bmpFileName;
+                            fscanf(lineHeader, "%s\n", bmpFileName);
+                        }
+                        else if(strcmp(lineHeader, "tiling") == 0){
+                            fscanf(lineHeader, "%d %d",this->u,this->v);
                         }
                     }
-                }else if (strcmp(lineHeader, "vt") == 0){
-                    Texcoord vt;
-                    fscanf(object, "%f %f\n", &vt.s,&vt.t);
-                    vts.push_back(vt);
-                }else if (strcmp(lineHeader, "f") == 0){
-                    Face face;
-                    int match = fscanf(object, "%d/%d %d/%d %d/%d %d/%d", &pidx[0],&tidx[0],&pidx[1],&tidx[1],&pidx[2],&tidx[2],&pidx[3],&tidx[3]);
-                    if(match == 6){
-                        face.pidx[0] = pidx[0];
-                        face.tidx[0] = tidx[0];
-                        face.pidx[1] = pidx[1];
-                        face.tidx[1] = tidx[1];
-                        face.pidx[2] = pidx[2];
-                        face.tidx[2] = tidx[2];
-                        faces.push_back(face);
-                    }else{
-                        Face face2;
-                        face.pidx[0] = pidx[0];
-                        face.tidx[0] = tidx[0];
-                        face.pidx[1] = pidx[1];
-                        face.tidx[1] = tidx[1];
-                        face.pidx[2] = pidx[2];
-                        face.tidx[2] = tidx[2];
-                        faces.push_back(face);
+                }else if (strcmp(lineHeader, "object") == 0){
+                    if(strcmp(lineHeader, "translation") == 0){
+                        fscanf(lineHeader, "%a %a %a", this->objekts.translation.X,this->objekts.translation.Y,this->objekts.translation.Z);
+                    }
+                    else if(strcmp(lineHeader, "rotation") == 0){
+                        fscanf(lineHeader, "%a %a %a %a",this->objekts.rotationVector.X,this->objekts.rotationVector.Y,this->objekts.rotationVector.Z,this->objekts.rotationAngle);
+                    }
+                    else if(strcmp(lineHeader, "scaling") == 0){
+                        fscanf(lineHeader, "%a %a %a", this->objekts.scaling.X,this->objekts.scaling.Y,this->objekts.scaling.Z)
+                    }
+                    else if(strcmp(lineHeader,"model"), == 0){
+                        string modelFile;
+                        fscanf(lineHeader, "%s",modelFile);
                         
-                        
-                        face2.pidx[0] = pidx[2];
-                        face2.tidx[0] = tidx[2];
-                        face2.pidx[1] = pidx[3];
-                        face2.tidx[1] = tidx[3];
-                        face2.pidx[2] = pidx[0];
-                        face2.tidx[2] = tidx[0];
-                        faces.push_back(face2);
+                    }
+                    else{
+                        String parent;
+                        fscanf(lineHeader, "%s",parent);
+                        if(paren == NULL){
+                            //Wurzeloperation
+                        }
                     }
                 }
             }
