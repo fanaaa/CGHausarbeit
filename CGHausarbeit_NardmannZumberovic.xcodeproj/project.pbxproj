@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		317386301C21A366002E085B /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3173862E1C21A366002E085B /* Scene.cpp */; };
+		317386331C21A49D002E085B /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 317386311C21A49D002E085B /* vector.cpp */; };
+		317386361C21A5B1002E085B /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 317386341C21A5B1002E085B /* Texture.cpp */; };
+		317386391C21A6E6002E085B /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 317386371C21A6E6002E085B /* Object.cpp */; };
+		3173863C1C21A968002E085B /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3173863A1C21A968002E085B /* Model.cpp */; };
 		31BBF7FB1C1F0156004A387F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 31BBF7FA1C1F0156004A387F /* main.cpp */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +28,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3173862E1C21A366002E085B /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
+		3173862F1C21A366002E085B /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
+		317386311C21A49D002E085B /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vector.cpp; sourceTree = "<group>"; };
+		317386321C21A49D002E085B /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
+		317386341C21A5B1002E085B /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = "<group>"; };
+		317386351C21A5B1002E085B /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = "<group>"; };
+		317386371C21A6E6002E085B /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
+		317386381C21A6E6002E085B /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
+		3173863A1C21A968002E085B /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
+		3173863B1C21A968002E085B /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
 		31BBF7F71C1F0156004A387F /* CGHausarbeit_NardmannZumberovic */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CGHausarbeit_NardmannZumberovic; sourceTree = BUILT_PRODUCTS_DIR; };
 		31BBF7FA1C1F0156004A387F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,6 +73,16 @@
 			isa = PBXGroup;
 			children = (
 				31BBF7FA1C1F0156004A387F /* main.cpp */,
+				3173862E1C21A366002E085B /* Scene.cpp */,
+				3173862F1C21A366002E085B /* Scene.h */,
+				317386311C21A49D002E085B /* vector.cpp */,
+				317386321C21A49D002E085B /* vector.h */,
+				317386341C21A5B1002E085B /* Texture.cpp */,
+				317386351C21A5B1002E085B /* Texture.h */,
+				317386371C21A6E6002E085B /* Object.cpp */,
+				317386381C21A6E6002E085B /* Object.h */,
+				3173863A1C21A968002E085B /* Model.cpp */,
+				3173863B1C21A968002E085B /* Model.h */,
 			);
 			path = CGHausarbeit_NardmannZumberovic;
 			sourceTree = "<group>";
@@ -118,7 +143,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				317386301C21A366002E085B /* Scene.cpp in Sources */,
+				317386361C21A5B1002E085B /* Texture.cpp in Sources */,
 				31BBF7FB1C1F0156004A387F /* main.cpp in Sources */,
+				3173863C1C21A968002E085B /* Model.cpp in Sources */,
+				317386391C21A6E6002E085B /* Object.cpp in Sources */,
+				317386331C21A49D002E085B /* vector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,6 +267,7 @@
 				31BBF8001C1F0156004A387F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
