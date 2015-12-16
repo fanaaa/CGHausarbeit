@@ -23,8 +23,8 @@ Scene::~Scene(){
 
 bool Scene::parseFile(){
     int result;
-    FILE * object = fopen(this->filename, "r");
-    if(object == NULL){
+    FILE * file = fopen(this->filename, "r");
+    if(file == NULL){
         cout << "Konnte Datei nicht oeffnen!" << endl;
         cout << getcwd(NULL, 0) << endl;
         perror("fopen");
@@ -33,44 +33,44 @@ bool Scene::parseFile(){
     else{
         while (1) {
             char lineHeader[256];
-            result = fscanf(object, "%s", lineHeader);
+            result = fscanf(file, "%s", lineHeader);
             if (result == EOF) {
                 break;
             }else{
                 if (strcmp(lineHeader, "room") == 0){
                     if(strcmp(lineHeader,"size") == 0){
                         Vector size;
-                        fscanf(object, "%f %f %f\n", &size.X,&size.Y,&size.Z);
+                        fscanf(file, "%f %f %f\n", &size.X,&size.Y,&size.Z);
                         // v.push_back(size); //anders speichern
                     }
                     else if(strcmp(lineHeader, "wallpaper") == 0){
                         if(strcmp(lineHeader, "texture") == 0){
-                            string bmpFileName;
-                            fscanf(lineHeader, "%s\n", bmpFileName);
+                            char* bmpFileName;
+                            fscanf(file, "%s", bmpFileName);
                         }
                         else if(strcmp(lineHeader, "tiling") == 0){
-                            fscanf(lineHeader, "%d %d",this->u,this->v);
+                            fscanf(file, "%d %d",this->u,this->v);
                         }
                     }
                 }else if (strcmp(lineHeader, "object") == 0){
                     if(strcmp(lineHeader, "translation") == 0){
-                        fscanf(lineHeader, "%a %a %a", this->objekts.translation.X,this->objekts.translation.Y,this->objekts.translation.Z);
+                        fscanf(file, "%a %a %a", this->objekts.translation.X,this->objekts.translation.Y,this->objekts.translation.Z);
                     }
                     else if(strcmp(lineHeader, "rotation") == 0){
-                        fscanf(lineHeader, "%a %a %a %a",this->objekts.rotationVector.X,this->objekts.rotationVector.Y,this->objekts.rotationVector.Z,this->objekts.rotationAngle);
+                        fscanf(file, "%a %a %a %a",this->objekts.rotationVector.X,this->objekts.rotationVector.Y,this->objekts.rotationVector.Z,this->objekts.rotationAngle);
                     }
                     else if(strcmp(lineHeader, "scaling") == 0){
-                        fscanf(lineHeader, "%a %a %a", this->objekts.scaling.X,this->objekts.scaling.Y,this->objekts.scaling.Z)
+                        fscanf(file, "%a %a %a", this->objekts.scaling.X,this->objekts.scaling.Y,this->objekts.scaling.Z);
                     }
-                    else if(strcmp(lineHeader,"model"), == 0){
-                        string modelFile;
-                        fscanf(lineHeader, "%s",modelFile);
+                    else if(strcmp(lineHeader,"model") == 0){
+                        char* modelFile;
+                        fscanf(file, "%s",modelFile);
                         
                     }
                     else{
-                        String parent;
-                        fscanf(lineHeader, "%s",parent);
-                        if(paren == NULL){
+                        char* parent;
+                        fscanf(file, "%s",parent);
+                        if(parent == NULL){
                             //Wurzeloperation
                         }
                     }
