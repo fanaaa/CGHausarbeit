@@ -52,8 +52,11 @@ bool Scene::parseFile(){
                 }else if(strcmp(lineHeader, "tiling") == 0){
                             fscanf(file, "%i %i\n",&this->u,&this->v);
                     cout << "u: " << this->u << " v:" << this->v << "\n" << endl;
+                }else if(strcmp(lineHeader, "object") == 0){
+                    char objName[256];
+                    fscanf(file, "%s\n", objName);
+                    cout << "Objekt: \n" << objName << endl;
                 }else if(strcmp(lineHeader, "translation") == 0){
-                        cout << "Objekt: \n" << endl;
                         fscanf(file, "%a %a %a\n", &this->objekts.translation.X,&this->objekts.translation.Y,&this->objekts.translation.Z);
                     cout << "Translation: \n" << "x:" << this->objekts.translation.X << " y:" << this->objekts.translation.Y << " z:" << this->objekts.translation.Z << endl;
                 }else if(strcmp(lineHeader, "rotation") == 0){

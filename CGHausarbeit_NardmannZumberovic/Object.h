@@ -20,9 +20,5 @@ public:
     Vector rotationVector;
     float rotationAngle;
     char name;
-    
-    ~Object();
-    Object(Vector translation,Vector scaling,Vector rotationVector,float rotationAngle);
-    Object();
 };
 #endif /* Object_h */
