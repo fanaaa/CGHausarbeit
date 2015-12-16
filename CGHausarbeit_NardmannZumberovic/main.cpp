@@ -7,9 +7,11 @@
 //
 
 #include <iostream>
+#include "Scene.h"
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    
+    Scene scene = Scene("test.osh");
+    scene.parseFile();
     return 0;
 }

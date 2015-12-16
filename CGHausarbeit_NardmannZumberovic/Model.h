@@ -11,11 +11,9 @@
 
 #include <iostream>
 #include "vector.h"
-#include "color.h"
 #include <string>
 #include <map>
 #include <vector>
-#include "Material.h"
 
 struct Vertex
 {

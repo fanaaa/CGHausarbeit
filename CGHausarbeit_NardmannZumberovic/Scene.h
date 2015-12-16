@@ -27,7 +27,6 @@ public:
     
     Scene(const char* Filename);
     ~Scene();
-private:
     bool parseFile();
     bool saveFile();
 };

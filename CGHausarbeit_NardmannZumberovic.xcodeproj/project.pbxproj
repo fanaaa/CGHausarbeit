@@ -28,6 +28,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0ED2954C1C22092900EE23D8 /* test.osh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.osh; sourceTree = "<group>"; };
 		3173862E1C21A366002E085B /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
 		3173862F1C21A366002E085B /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
 		317386311C21A49D002E085B /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vector.cpp; sourceTree = "<group>"; };
@@ -56,6 +57,7 @@
 		31BBF7EE1C1F0156004A387F = {
 			isa = PBXGroup;
 			children = (
+				0ED2954C1C22092900EE23D8 /* test.osh */,
 				31BBF7F91C1F0156004A387F /* CGHausarbeit_NardmannZumberovic */,
 				31BBF7F81C1F0156004A387F /* Products */,
 			);
