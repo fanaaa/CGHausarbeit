@@ -3,6 +3,7 @@
 //  CGHausarbeit_NardmannZumberovic
 //
 //  Created by Fana Zumberovic on 16.12.15.
+//  Collaborator: Philipp Nardmann
 //  Copyright © 2015 HochschuleOsnabrueck. All rights reserved.
 //
 
@@ -17,6 +18,11 @@ public:
     Vector translation;
     Vector scaling;
     Vector rotationVector;
-    float rotationAngle;    
+    float rotationAngle;
+    char name;
+    
+    ~Object();
+    Object(Vector translation,Vector scaling,Vector rotationVector,float rotationAngle);
+    Object();
 };
 #endif /* Object_h */

@@ -3,6 +3,7 @@
 //  CGHausarbeit_NardmannZumberovic
 //
 //  Created by Fana Zumberovic on 16.12.15.
+//  Collaborator: Philipp Nardmann
 //  Copyright © 2015 HochschuleOsnabrueck. All rights reserved.
 //
 
@@ -38,44 +39,34 @@ bool Scene::parseFile(){
             if (result == EOF) {
                 break;
             }else{
-                if (strcmp(lineHeader, "room") == 0){
-                    if(strcmp(lineHeader,"size") == 0){
+                if(strcmp(lineHeader,"size") == 0){
                         Vector size;
                         fscanf(file, "%f %f %f\n", &size.X,&size.Y,&size.Z);
-                        cout << "x: %i y: %i z: %i" << size.X,size.Y,size.Z;
-                        cout << endl;
-                    }
-                    else if(strcmp(lineHeader, "wallpaper") == 0){
-                        if(strcmp(lineHeader, "texture") == 0){
-                            char* bmpFileName;
+                    cout << "Room: \n" << endl;
+                    cout << "x:" << size.X << " y:" << size.Y << " z:" << size.Z << "\n" << endl;
+                }else if(strcmp(lineHeader, "texture") == 0){
+                            char bmpFileName[256];
                             fscanf(file, "%s\n", bmpFileName);
-                        }
-                        else if(strcmp(lineHeader, "tiling") == 0){
+                    cout << "Wallpaper: \n" << endl;
+                    cout << "Filename: " << bmpFileName << endl;
+                }else if(strcmp(lineHeader, "tiling") == 0){
                             fscanf(file, "%i %i\n",&this->u,&this->v);
-                        }
-                    }
-                }else if (strcmp(lineHeader, "object") == 0){
-                    if(strcmp(lineHeader, "translation") == 0){
+                    cout << "u: " << this->u << " v:" << this->v << "\n" << endl;
+                }else if(strcmp(lineHeader, "translation") == 0){
+                        cout << "Objekt: \n" << endl;
                         fscanf(file, "%a %a %a\n", &this->objekts.translation.X,&this->objekts.translation.Y,&this->objekts.translation.Z);
-                    }
-                    else if(strcmp(lineHeader, "rotation") == 0){
+                    cout << "Translation: \n" << "x:" << this->objekts.translation.X << " y:" << this->objekts.translation.Y << " z:" << this->objekts.translation.Z << endl;
+                }else if(strcmp(lineHeader, "rotation") == 0){
                         fscanf(file, "%a %a %a %a\n",&this->objekts.rotationVector.X,&this->objekts.rotationVector.Y,&this->objekts.rotationVector.Z,&this->objekts.rotationAngle);
-                    }
-                    else if(strcmp(lineHeader, "scaling") == 0){
+                    cout << "Rotation: \n" << "x:" << this->objekts.rotationVector.X << " y:" << this->objekts.rotationVector.Y << " z:" << this->objekts.rotationVector.Z << " Angle: " << this->objekts.rotationAngle << endl;
+                }else if(strcmp(lineHeader, "scaling") == 0){
                         fscanf(file, "%a %a %a\n", &this->objekts.scaling.X,&this->objekts.scaling.Y,&this->objekts.scaling.Z);
-                    }
-                    else if(strcmp(lineHeader,"model") == 0){
-                        char* modelFile;
+                    cout << "Scaling: \n" << "x:" << this->objekts.scaling.X << " y:" << this->objekts.scaling.Y << " z:" << this->objekts.scaling.Z << endl;
+                }else if(strcmp(lineHeader,"model") == 0){
+                        char modelFile[256];
                         fscanf(file, "%s\n",modelFile);
+                    cout << "Modelfile: " << modelFile << "\n" << endl;
                         
-                    }
-                    else{
-                        char* parent;
-                        fscanf(file, "%s\n",parent);
-                        if(parent == NULL){
-                            //Wurzeloperation
-                        }
-                    }
                 }
             }
             
