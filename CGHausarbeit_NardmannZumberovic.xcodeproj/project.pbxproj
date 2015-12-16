@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E33E1061C2212D100A8172F /* color.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E33E1001C2212D100A8172F /* color.cpp */; };
+		0E33E1071C2212D100A8172F /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E33E1021C2212D100A8172F /* Material.cpp */; };
+		0E33E1081C2212D100A8172F /* ObjParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E33E1041C2212D100A8172F /* ObjParser.cpp */; };
+		0E33E10A1C2213A400A8172F /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E33E1091C2213A400A8172F /* GLUT.framework */; };
+		0E33E10C1C2213AA00A8172F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E33E10B1C2213AA00A8172F /* OpenGL.framework */; };
 		317386301C21A366002E085B /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3173862E1C21A366002E085B /* Scene.cpp */; };
 		317386331C21A49D002E085B /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 317386311C21A49D002E085B /* vector.cpp */; };
 		317386361C21A5B1002E085B /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 317386341C21A5B1002E085B /* Texture.cpp */; };
@@ -28,6 +33,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E33E1001C2212D100A8172F /* color.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = color.cpp; path = ../color.cpp; sourceTree = "<group>"; };
+		0E33E1011C2212D100A8172F /* color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = color.h; path = ../color.h; sourceTree = "<group>"; };
+		0E33E1021C2212D100A8172F /* Material.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Material.cpp; path = ../Material.cpp; sourceTree = "<group>"; };
+		0E33E1031C2212D100A8172F /* Material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Material.h; sourceTree = "<group>"; };
+		0E33E1041C2212D100A8172F /* ObjParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ObjParser.cpp; path = ../ObjParser.cpp; sourceTree = "<group>"; };
+		0E33E1051C2212D100A8172F /* ObjParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ObjParser.h; path = ../ObjParser.h; sourceTree = "<group>"; };
+		0E33E1091C2213A400A8172F /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		0E33E10B1C2213AA00A8172F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		0ED2954C1C22092900EE23D8 /* test.osh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test.osh; sourceTree = "<group>"; };
 		3173862E1C21A366002E085B /* Scene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scene.cpp; sourceTree = "<group>"; };
 		3173862F1C21A366002E085B /* Scene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scene.h; sourceTree = "<group>"; };
@@ -48,6 +61,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E33E10C1C2213AA00A8172F /* OpenGL.framework in Frameworks */,
+				0E33E10A1C2213A400A8172F /* GLUT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,6 +72,8 @@
 		31BBF7EE1C1F0156004A387F = {
 			isa = PBXGroup;
 			children = (
+				0E33E10B1C2213AA00A8172F /* OpenGL.framework */,
+				0E33E1091C2213A400A8172F /* GLUT.framework */,
 				0ED2954C1C22092900EE23D8 /* test.osh */,
 				31BBF7F91C1F0156004A387F /* CGHausarbeit_NardmannZumberovic */,
 				31BBF7F81C1F0156004A387F /* Products */,
@@ -78,6 +95,12 @@
 				3173862E1C21A366002E085B /* Scene.cpp */,
 				3173862F1C21A366002E085B /* Scene.h */,
 				317386311C21A49D002E085B /* vector.cpp */,
+				0E33E1001C2212D100A8172F /* color.cpp */,
+				0E33E1011C2212D100A8172F /* color.h */,
+				0E33E1021C2212D100A8172F /* Material.cpp */,
+				0E33E1031C2212D100A8172F /* Material.h */,
+				0E33E1041C2212D100A8172F /* ObjParser.cpp */,
+				0E33E1051C2212D100A8172F /* ObjParser.h */,
 				317386321C21A49D002E085B /* vector.h */,
 				317386341C21A5B1002E085B /* Texture.cpp */,
 				317386351C21A5B1002E085B /* Texture.h */,
@@ -147,8 +170,11 @@
 			files = (
 				317386301C21A366002E085B /* Scene.cpp in Sources */,
 				317386361C21A5B1002E085B /* Texture.cpp in Sources */,
+				0E33E1081C2212D100A8172F /* ObjParser.cpp in Sources */,
 				31BBF7FB1C1F0156004A387F /* main.cpp in Sources */,
 				3173863C1C21A968002E085B /* Model.cpp in Sources */,
+				0E33E1071C2212D100A8172F /* Material.cpp in Sources */,
+				0E33E1061C2212D100A8172F /* color.cpp in Sources */,
 				317386391C21A6E6002E085B /* Object.cpp in Sources */,
 				317386331C21A49D002E085B /* vector.cpp in Sources */,
 			);
