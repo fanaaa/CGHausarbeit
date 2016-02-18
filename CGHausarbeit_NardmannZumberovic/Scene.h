@@ -24,11 +24,14 @@ public:
     const char* filename;
     int u;
     int v;
-    Object objekts;
+    vector<Object> objects;
+    Object objekts; //zum Testen der Datei
     
+    Scene();
     Scene(const char* Filename);
     ~Scene();
     bool parseFile();
     bool saveFile();
+    void coutObject();
 };
 #endif /* Scene_h */

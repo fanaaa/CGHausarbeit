@@ -14,8 +14,6 @@
 #include <iostream>
 #include <float.h>
 
-using namespace std;
-
 Scene::Scene(const char* Filename){
     this->filename = Filename;
 }
@@ -33,6 +31,13 @@ bool Scene::parseFile(){
         return false;
     }
     else{
+        vector<char*> objNames;
+        vector<char*> parentNames;
+        vector<char*> fileNames;
+        vector<Vector> translations;
+        vector<Vector> scalings;
+        vector<Vector> rotationsVertices;
+        vector<float> rotationAngles;
         while (1) {
             char lineHeader[256];
             result = fscanf(file, "%s", lineHeader);
@@ -40,43 +45,97 @@ bool Scene::parseFile(){
                 break;
             }else{
                 if(strcmp(lineHeader,"size") == 0){
-                        Vector size;
-                        fscanf(file, "%f %f %f\n", &size.X,&size.Y,&size.Z);
-                    cout << "Room: \n" << endl;
-                    cout << "x:" << size.X << " y:" << size.Y << " z:" << size.Z << "\n" << endl;
+                    Vector size;
+                    fscanf(file, "%f %f %f\n", &size.X,&size.Y,&size.Z);
                 }else if(strcmp(lineHeader, "texture") == 0){
-                            char bmpFileName[256];
-                            fscanf(file, "%s\n", bmpFileName);
-                    cout << "Wallpaper: \n" << endl;
-                    cout << "Filename: " << bmpFileName << endl;
+                    char bmpFileName[256];
+                    fscanf(file, "%s\n", bmpFileName);
                 }else if(strcmp(lineHeader, "tiling") == 0){
-                            fscanf(file, "%i %i\n",&this->u,&this->v);
-                    cout << "u: " << this->u << " v:" << this->v << "\n" << endl;
+                    fscanf(file, "%i %i\n",&this->u,&this->v);
+                    //Objekt
                 }else if(strcmp(lineHeader, "object") == 0){
-                    char objName[256];
+                    char *objName = new char[256];
                     fscanf(file, "%s\n", objName);
-                    cout << "Objekt: \n" << objName << endl;
+                    objNames.push_back(objName);
                 }else if(strcmp(lineHeader, "translation") == 0){
-                        fscanf(file, "%a %a %a\n", &this->objekts.translation.X,&this->objekts.translation.Y,&this->objekts.translation.Z);
-                    cout << "Translation: \n" << "x:" << this->objekts.translation.X << " y:" << this->objekts.translation.Y << " z:" << this->objekts.translation.Z << endl;
+                    Vector translation;
+                    fscanf(file, "%a %a %a\n", &translation.X,&translation.Y,&translation.Z);
+                    translations.push_back(translation);
                 }else if(strcmp(lineHeader, "rotation") == 0){
-                        fscanf(file, "%a %a %a %a\n",&this->objekts.rotationVector.X,&this->objekts.rotationVector.Y,&this->objekts.rotationVector.Z,&this->objekts.rotationAngle);
-                    cout << "Rotation: \n" << "x:" << this->objekts.rotationVector.X << " y:" << this->objekts.rotationVector.Y << " z:" << this->objekts.rotationVector.Z << " Angle: " << this->objekts.rotationAngle << endl;
+                    Vector rotationVector;
+                    float rotationAngle;
+                    fscanf(file, "%f %f %f %f\n",&rotationVector.X,&rotationVector.Y,&rotationVector.Z,&rotationAngle);
+                    rotationsVertices.push_back(rotationVector);
+                    rotationAngles.push_back(rotationAngle);
                 }else if(strcmp(lineHeader, "scaling") == 0){
-                        fscanf(file, "%a %a %a\n", &this->objekts.scaling.X,&this->objekts.scaling.Y,&this->objekts.scaling.Z);
-                    cout << "Scaling: \n" << "x:" << this->objekts.scaling.X << " y:" << this->objekts.scaling.Y << " z:" << this->objekts.scaling.Z << endl;
+                    Vector scaling;
+                    fscanf(file, "%f %f %f \n", &scaling.X,&scaling.Y,&scaling.Z);
+                    scalings.push_back(scaling);
                 }else if(strcmp(lineHeader,"model") == 0){
-                        char modelFile[256];
-                        fscanf(file, "%s\n",modelFile);
-                    cout << "Modelfile: " << modelFile << "\n" << endl;
-                        
+                    char *modelFile = new char[256];
+                    fscanf(file, "%s\n",modelFile);
+                    fileNames.push_back(modelFile);
+                }else if(strcmp(lineHeader, "parent") == 0){
+                    char *parent = new char[256];
+                    fscanf(file, "%s\n",parent);
+                    parentNames.push_back(parent);
                 }
+                
             }
-            
-            
-            
         }
-
-    return true;
+        
+        for(int i = 0; i < objNames.size(); i++){
+            Object object;
+            object.setName(objNames[i]);
+            object.setFileName(fileNames[i]);
+            object.setParentName(parentNames[i]);
+            object.setScaling(scalings[i]);
+            object.setTranslation(translations[i]);
+            object.setRotation(rotationsVertices[i], rotationAngles[i]);
+            this->objects.push_back(object);
+        }
+        return true;
+    }
 }
+
+void Scene::coutObject(){
+    cout << "Objektname: " << this->objekts.getName() << endl;
+    cout << "Translastion: "<< endl;
+    cout << "X: " << this->objekts.getTranslation().X << endl;
+    cout << "Y: " << this->objekts.getTranslation().Y << endl;
+    cout << "Z: " << this->objekts.getTranslation().Z << endl;
+    cout << "Scaling: " << endl;
+    cout << "X: " << this->objekts.getScaling().X << endl;
+    cout << "Y: " << this->objekts.getScaling().Y << endl;
+    cout << "Z: " << this->objekts.getScaling().Z << endl;
+    cout << "Rotation: " << endl;
+    cout << "X: " << this->objekts.getRotationVector().X << endl;
+    cout << "Y: " << this->objekts.getRotationVector().Y << endl;
+    cout << "Z: " << this->objekts.getRotationVector().Z << endl;
+    cout << "Angle: " << this->objekts.getRotationAngle() << endl;
+    cout << "Parent: " << this->objekts.getParentName() << endl;
+    cout << "File: " << this->objekts.getFileName() << endl;
+}
+
+bool Scene::saveFile(){
+    FILE * file = fopen(this->filename, "w");
+    Object tmp;
+    char *line;
+    if(file == NULL){
+        cout << "Konnte Datei nicht oeffnen!" << endl;
+        cout << getcwd(NULL, 0) << endl;
+        perror("fopen");
+        return false;
+    }else{
+        for (int i = 0 ; i < this->objects.size(); i++) {
+            tmp = this->objects.at(i);
+            //Objektname
+            fprintf(file, "object ");
+            line = tmp.getName();
+            fprintf(file, line);
+            fprintf(file, "\n{");
+            //Tranlation
+        }
+        return true;
+    }
 }
