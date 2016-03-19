@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "vector.h"
+#include "matrix.h"
 
 extern const unsigned int g_WindowWidth;
 extern const unsigned int g_WindowHeight;
@@ -33,6 +34,8 @@ public:
     void mouseInput( int x, int y, int Button, int State);
     
     void apply();
+    const Matrix& getViewMatrix() const;
+    const Matrix& getProjectionMatrix() const;
 protected:
     void pan( float dx, float dy);
     void zoom( float dz);
@@ -40,7 +43,8 @@ protected:
     Vector getVSpherePos( float x, float y);
     Vector rotateAxisAngle( Vector v, Vector n, float a);
     
-    
+    Matrix m_ViewMatrix;
+    Matrix m_ProjMatrix;
     Vector m_Position;
     Vector m_Target;
     Vector m_Up;

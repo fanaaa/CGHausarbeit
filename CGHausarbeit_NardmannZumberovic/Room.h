@@ -14,6 +14,7 @@
 #include <GLUT/GLUT.h>
 #include <OpenGL/OpenGL.h>
 #include "ShaderProgram.h"
+#include "Texture.h"
 struct RVertex{
     Vector pos;
     Vector normal;
@@ -25,8 +26,8 @@ public:
     Room();
     Room(float x, float y, float z);
     ~Room();
-    bool loadWall(ShaderProgram shader,float u, float v);
-    bool loadFloor(ShaderProgram shader,float u, float v);
+    bool loadWall(const char* texture, float u, float v);
+    bool loadFloor(const char* texture, float u, float v);
     void drawRoom();
 private:
     float width;
@@ -37,6 +38,8 @@ private:
     GLuint wallIndexBuffer;
     GLuint floorVertexBuffer;
     GLuint floorIndexBuffer;
+    Texture wallTexture;
+    Texture floorTexture;
 };
 
 #endif /* Room_hpp */

@@ -19,22 +19,9 @@ Room::Room(float x, float y, float z){
 
 Room::~Room(){}
 
-bool Room::loadWall(ShaderProgram shader,float u, float v){
+bool Room::loadWall(const char* texture, float u, float v){
     
-    shader.activate();
-    GLint loc = shader.getParameterID("LightPos");
-    glUniform3f(loc, 1.0f, 4.0f, 1.0f);
-    loc = shader.getParameterID("LightColor");
-    glUniform3f(loc, 0.5f, 0.5f, 0.5f);
-    loc = shader.getParameterID("DiffColor");
-    glUniform3f(loc, 1.0f, 1.0f, 1.0f);
-    loc = shader.getParameterID("SpecColor");
-    glUniform3f(loc, 0.1f, 0.1f, 0.1f);
-    loc = shader.getParameterID("AmbientColor");
-    glUniform3f(loc, 0.2f, 0.2f, 0.2f);
-    loc = shader.getParameterID("SpecExp");
-    glUniform1f(loc, 1);
-    shader.deactivate();
+    Texture wallpaper;
 
     RVertex wallVertices[12]{
         //first wall
@@ -77,27 +64,18 @@ bool Room::loadWall(ShaderProgram shader,float u, float v){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*24, wallIndices, GL_STATIC_DRAW);
     
+    if(!wallpaper.LoadFromBMP(texture)) {
+        return false;
+    }
+    
+    wallTexture = wallpaper;
 
     return true;
 }
 
-bool Room::loadFloor(ShaderProgram shader,float u, float v){
+bool Room::loadFloor(const char* texture, float u, float v){
     
-    shader.activate();
-    GLint loc = shader.getParameterID("LightPos");
-    glUniform3f(loc, 1.0f, 4.0f, 1.0f);
-    loc = shader.getParameterID("LightColor");
-    glUniform3f(loc, 0.5f, 0.5f, 0.5f);
-    loc = shader.getParameterID("DiffColor");
-    glUniform3f(loc, 1.0f, 1.0f, 1.0f);
-    loc = shader.getParameterID("SpecColor");
-    glUniform3f(loc, 0.1f, 0.1f, 0.1f);
-    loc = shader.getParameterID("AmbientColor");
-    glUniform3f(loc, 0.2f, 0.2f, 0.2f);
-    loc = shader.getParameterID("SpecExp");
-    glUniform1f(loc, 1);
-    shader.deactivate();
-
+    Texture wallpaper;
     RVertex floorVertices[4] =
     {
         {Vector(-width,0,-length), Vector(0,0,0), 0, 0},
@@ -129,57 +107,60 @@ bool Room::loadFloor(ShaderProgram shader,float u, float v){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*6, floorIndices, GL_STATIC_DRAW);
     
+    if(!wallpaper.LoadFromBMP(texture)) {
+        return false;
+    }
+    
+    floorTexture = wallpaper;
 
     return true;
 }
 
 void Room::drawRoom(){
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    // array buffers for walls
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, wallVertexBuffer);
-    
-    
-    // position & normal
-    glVertexPointer(3, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(0));
-    glNormalPointer(GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(12));
-    
-    glActiveTexture(GL_TEXTURE0);
-    glClientActiveTexture(GL_TEXTURE0);
-    glTexCoordPointer(2, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(24));
-    
-    
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    
-    // draw walls
-    glDrawElements( GL_TRIANGLES, 18, GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
-    
-   
-    //array buffers for floor
+    // inform the client that we want to use array buffers
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, floorVertexBuffer);
     
-    //position & normal
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    
+    // setup position & normal pointers
     glVertexPointer(3, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(0));
     glNormalPointer(GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(12));
     
     glActiveTexture(GL_TEXTURE0);
     glClientActiveTexture(GL_TEXTURE0);
     glTexCoordPointer(2, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(24));
-
+    floorTexture.apply();
     
-    //draw floor
+    
+    // we draw our plane
     glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
-
     // disable states in reverse order
     glDisable(GL_TEXTURE_2D);
+    // inform the client that we want to use array buffers
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, wallVertexBuffer);
+    
+    // setup position & normal pointers
+    glVertexPointer(3, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(0));
+    glNormalPointer(GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(12));
+    
+    glActiveTexture(GL_TEXTURE0);
+    glClientActiveTexture(GL_TEXTURE0);
+    glTexCoordPointer(2, GL_FLOAT, sizeof(RVertex), BUFFER_OFFSET(24));
+    wallTexture.apply();
+    
+    // we draw our plane
+    glDrawElements( GL_TRIANGLES, 24, GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
+    
+    // disable states in reverse order
+    glDisable(GL_TEXTURE_2D);
+    
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // set modulate as default behaviour for unit 0
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
+  }

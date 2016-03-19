@@ -2,8 +2,8 @@
 //  color.h
 //  CG_Praktikum1
 //
-//  Created by Benedikt Boss on 10.03.15.
-//  Copyright (c) 2015 Benedikt Boss. All rights reserved.
+//  Created by Fana Zumberovic on 11.03.15.
+//  Copyright (c) 2015 Fana Zumberovic. All rights reserved.
 //
 
 #ifndef __CG_Praktikum1__color__

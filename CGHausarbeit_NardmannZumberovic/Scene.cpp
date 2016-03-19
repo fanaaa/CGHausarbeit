@@ -98,44 +98,89 @@ bool Scene::parseFile(){
     }
 }
 
-void Scene::coutObject(){
-    cout << "Objektname: " << this->objekts.getName() << endl;
-    cout << "Translastion: "<< endl;
-    cout << "X: " << this->objekts.getTranslation().X << endl;
-    cout << "Y: " << this->objekts.getTranslation().Y << endl;
-    cout << "Z: " << this->objekts.getTranslation().Z << endl;
-    cout << "Scaling: " << endl;
-    cout << "X: " << this->objekts.getScaling().X << endl;
-    cout << "Y: " << this->objekts.getScaling().Y << endl;
-    cout << "Z: " << this->objekts.getScaling().Z << endl;
-    cout << "Rotation: " << endl;
-    cout << "X: " << this->objekts.getRotationVector().X << endl;
-    cout << "Y: " << this->objekts.getRotationVector().Y << endl;
-    cout << "Z: " << this->objekts.getRotationVector().Z << endl;
-    cout << "Angle: " << this->objekts.getRotationAngle() << endl;
-    cout << "Parent: " << this->objekts.getParentName() << endl;
-    cout << "File: " << this->objekts.getFileName() << endl;
-}
-
+//Aktuelle Positionen in Datei speichern
 bool Scene::saveFile(){
     FILE * file = fopen(this->filename, "w");
-    Object tmp;
-    char *line;
     if(file == NULL){
         cout << "Konnte Datei nicht oeffnen!" << endl;
         cout << getcwd(NULL, 0) << endl;
         perror("fopen");
         return false;
     }else{
-        for (int i = 0 ; i < this->objects.size(); i++) {
-            tmp = this->objects.at(i);
-            //Objektname
-            fprintf(file, "object ");
-            line = tmp.getName();
-            fprintf(file, line);
-            fprintf(file, "\n{");
-            //Tranlation
+        //Room
+        
+        //Object
+        for(Object tmp : this->objects){
+            this->writeObjectHeader(file,tmp);
+            this->writeObjectTransformations(file, tmp);
         }
+        fclose(file);
         return true;
     }
 }
+
+
+
+Object& Scene::getObjectByName(char* objName){
+    Object& tmp = this->objects.at(0);
+    for (Object& tmp : this->objects) {
+        if (!std::strcmp(tmp.getName(), objName)) {
+            return tmp;
+        }
+    }
+    return tmp;
+}
+
+void Scene::setActiveObject(){
+    for(Object& tmp : this->objects){
+        if(tmp.objectIsClicked()){
+            this->activeObject = tmp.getName();
+            break;
+        }
+    }
+}
+
+void Scene::writeObjectHeader(FILE *file, Object obj){
+    char objectHeader[124] = "";
+    strcat(objectHeader, "object ");
+    strcat(objectHeader, obj.getName());
+    strcat(objectHeader, "\n");
+    fprintf(file, objectHeader);
+}
+
+void Scene::writeObjectTransformations(FILE *file, Object obj){
+    char objectBody[1024] = "";
+    char translation [128] = "";
+    char rotation [128] = "";
+    char scaling [128]= "";
+    char fileName[128] = "";
+    char parent[128] = "";
+    //Translation
+    sprintf(translation, "%s %f %f %f", "translation",obj.getTranslation().X, obj.getTranslation().Y,obj.getTranslation().Z);
+    strcat(translation, "\n");
+    //Rotation
+    sprintf(rotation, "%s %f %f %f %f","rotation ", obj.getRotationVector().X,obj.getRotationVector().Y,obj.getRotationVector().Z,obj.getRotationAngle());
+    strcat(rotation, "\n");
+    //Scaling
+    sprintf(scaling, "%s %f %f %f","scaling ", obj.getScaling().X, obj.getScaling().Y,obj.getScaling().Z);
+    strcat(scaling, "\n");
+    //Dateiname
+    strcat(fileName, "model ");
+    strcat(fileName, obj.getName());
+    strcat(fileName, ".obj");
+    strcat(fileName, "\n");
+    //Parent
+    strcat(parent, "parent ");
+    strcat(parent, obj.getParentName());
+    strcat(parent, "\n");
+    //Objekt zusammensetzen
+    strcat(objectBody, "{\n");
+    strcat(objectBody, translation);
+    strcat(objectBody, rotation);
+    strcat(objectBody, scaling);
+    strcat(objectBody, fileName);
+    strcat(objectBody, parent);
+    strcat(objectBody, "}\n");
+    fprintf(file, objectBody);
+}
+

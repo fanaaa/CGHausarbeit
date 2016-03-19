@@ -9,7 +9,7 @@
 #include "vector.h"
 #include <cmath>
 
-#define EPSILON 1e-6
+#define EPSILON 1e-3
 
 Vector::Vector(float x, float y, float z){
     this->X = x;

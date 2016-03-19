@@ -20,25 +20,25 @@
 #include <stdio.h>
 
 //Verwendete Objekte und Konstanten
-const unsigned int g_WindowWidth=1024;
-const unsigned int g_WindowHeight=768;
+const unsigned int g_WindowWidth= 1024;
+const unsigned int g_WindowHeight= 768;
+bool rotation = false;
 float angle = 0.0;
-float zAxis = 0.0;
-float xAxis = 0.0;
-bool changes = false;
-Room room = Room(10.0f, 10.0f, 10.0f);
-char activeObject[56] = "vase";
+Room room = Room(15.0f, 15.0f, 15.0f);
 Vector translation;
 Vector rotationV;
 float rotationA;
 Vector scaling;
-Object tmpObject;
+float scalingFactor;
 Scene scene = Scene("test.osh");
 const Vector g_LightPos = Vector( 0,4,0);
 Camera g_Camera;
 int g_MouseButton = 0;
 int g_MouseState = 0;
 ShaderProgram shader;
+bool camera = false;
+Vector rayOrigin;
+Vector worldDirection;
 
 //Methodendeklaration
 void DrawScene();
@@ -49,14 +49,20 @@ void DrawObjects();
 void DrawRoom();
 void Draw();
 void SetupShader();
+void resetVectors();
+void updateActiveObject(int i);
+void coutMatrix(Matrix &matrix);
 void KeyboardCallback( unsigned char key, int x, int y);
 void MouseCallback(int Button, int State, int x, int y);
 void MouseMoveCallback(int x, int y);
+void SpecialCallback(int key,int x,int y);
+void initObjects();
+void coutMatrix(Matrix &matrix);
+void calcMouseRay(int x,int y);
 
 
 
 int main(int argc,char * argv[]) {
-    
     glutInitWindowSize(g_WindowWidth , g_WindowHeight);
     glutInit(&argc, argv);
     
@@ -68,10 +74,15 @@ int main(int argc,char * argv[]) {
     glutKeyboardFunc(KeyboardCallback);
     glutMouseFunc(MouseCallback);
     glutMotionFunc(MouseMoveCallback);
+    glutSpecialFunc(SpecialCallback);
+
     
     loadObjects();
-    room.loadWall(shader,1.0f, 0.0f);
-    room.loadFloor(shader,1.0f, 0.0f);
+    scene.activeObject = "Puppe";
+    initObjects();
+    resetVectors();
+    room.loadWall("/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/tapete.bmp",1.0f, 1.0f);
+    room.loadFloor("/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/boden.bmp",4.0f, 3.0f);
     
     
     glutDisplayFunc(DrawScene);
@@ -133,177 +144,177 @@ void SetupSettings(){
         glShadeModel(GL_SMOOTH);
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
-        
+    
     
 }
 
-void DrawGroundGrid()
-{
-    const float GridSize=10.0f;
-    const unsigned int GridSegments=20;
-    const float GridStep=GridSize/(float)GridSegments;
-    const float GridOrigin=-GridSize*0.5f;
-    
-    glDisable( GL_LIGHTING);
-    glBegin(GL_LINES);
-    glColor3f(1.0f, 1.0f, 1.0f);
-    for( unsigned int i=0; i<GridSegments+1; i++)
-    {
-        float itpos=GridOrigin + GridStep*(float)i;
-        glVertex3f(itpos, 0, GridOrigin);
-        glVertex3f(itpos, 0, GridOrigin+GridSize);
-        
-        glVertex3f(GridOrigin, 0, itpos);
-        glVertex3f(GridOrigin+GridSize, 0, itpos);
-        
-    }
-    glEnd();
-    glEnable( GL_LIGHTING);
-    
-}
-
+//Raum und Objekte laden
 void loadObjects(){
     scene.parseFile();
-    for(int i = 0; i < scene.objects.size(); i++){
-        Object tmp = scene.objects.at(i);
-        scene.objects.at(i).load(tmp.getFileName(), tmp.getTranslation(), tmp.getScaling(), tmp.getRotationVector() , tmp.getRotationAngle());
-        tmpObject = tmp;
+    for(Object& tmp : scene.objects){
+         tmp.load(tmp.getFileName(), tmp.getTranslation(), tmp.getScaling(), tmp.getRotationVector() , tmp.getRotationAngle());
     }
 }
 
+//Objekte darstellen
 void DrawObjects(){
-    for(int i = 0; i < scene.objects.size(); i++){
-        Object tmp = scene.objects.at(i);
-        glPushMatrix();
-        if(strcmp(tmp.getName(), activeObject)){
-            glRotatef(angle, 0, 0, 1);
-            glTranslatef(xAxis, 0, zAxis);
-            tmp.draw();
-        }else{
-            glTranslatef(tmp.getTranslation().X, tmp.getTranslation().Y, tmp.getTranslation().Z);
-            tmp.draw();
+    int i = 0;
+    for(Object& tmp : scene.objects){
+        tmp.setActive(false);
+        if(!strcmp(tmp.getName(), scene.activeObject)){
+            updateActiveObject(i);
+            tmp.setActive(true);
         }
+        glPushMatrix();
+        glMultMatrixf(tmp.getMatrix());
+        tmp.draw();
         glPopMatrix();
+        i++;
     }
 }
 
+//Raum darstellen
 void DrawRoom(){
     room.drawRoom();
 }
 
-void SetupShader(){
-    std::string err;
-    
-    //encoding is broken
-    //-f PhongFragmentShader.glsl PhongVertexShader.glsl
-    int argc = 5;
-    char arg1[] = "-f";
-    char arg2[] = "TextureCombinerFragment.glsl";//"PhongFragment.glsl";
-    char arg3[] = "-v";
-    char arg4[] = "TextureCombinerVertex.glsl";//"PhongFragment.glsl";
-    
-    ShaderProgram program;
-    if(argc >= 3) {
-        char* vertexFile = nullptr;
-        char* fragmentFile = nullptr;
-        if(strcmp(arg1, "-f") == 0) {
-            fragmentFile = (char*) arg2;
-        } else if(strcmp(arg1, "-v") == 0) {
-            vertexFile = (char*) arg2;
-        }
-        
-        if(argc == 5) {
-            if(strcmp(arg3, "-f") == 0) {
-                if (!fragmentFile) {
-                    fragmentFile = (char*) arg4;
-                }
-            } else if(strcmp(arg3, "-v") == 0) {
-                if (!vertexFile) {
-                    vertexFile = (char*) arg4;
-                }
-            }
-        }
-        
-        bool loadedFragment = false;
-        if(fragmentFile) {
-            if (program.loadFragmentShader(fragmentFile)) {
-                loadedFragment = true;
-            }
-        }
-        
-        bool loadedVertex = false;
-        if(vertexFile) {
-            if(program.loadVertexShader(vertexFile)) {
-                loadedVertex = true;
-            }
-        }
-        
-        if(loadedFragment || loadedVertex) {
-            if(!program.compile(&err)) {
-                std::cout << err << std::endl;
-            }
-        }
-        
-    }
-
-}
 
 void KeyboardCallback( unsigned char key, int x, int y){
+    //Rotation
     if (key == 'l'){
         angle += .5;
     }
     if (key == 't'){
         angle -= .5;
     }
-    if (key == 'c') {
-        //translation, rotation, scaling in Object speichern
-        if(changes){
-            Vector transformation = Vector(xAxis,0,zAxis);
-            for (int i = 0; i < scene.objects.size(); i++) {
-                if (strcmp(activeObject, scene.objects.at(i).getName())== 0) {
-                        scene.objects.at(i).setTranslation(transformation);
-                    }
-                }
-        }
-        changes = false;
-        angle = 0.0;
-        zAxis = 0.0;
-        xAxis = 0.0;
-        if(strcmp(activeObject, "vase") == 0){
-            strcpy(activeObject, "tisch");
-            cout << "in Vase" << endl;
-        }else{
-            strcpy(activeObject, "vase");
-            cout << "in tisch" << endl;
-        }
-    }
+    //Translation
     if (key == 'w') {
-        changes = true;
-        zAxis += .5;
+        translation.Z += .5;
     }
     if (key == 's') {
-        changes = true;
-        zAxis -= .5;
+        translation.Z -= .5;
     }
     if (key == 'a') {
-        changes = true;
-        xAxis += .5;
+        translation.X += .5;
     }
     if (key == 'd') {
-        changes = true;
-        xAxis -= .5;
+        translation.X -= .5;
     }
+    //Scaling
+    if (key == '+') {
+        scalingFactor += .1;
+    }
+    if (key == '-') {
+        scalingFactor -= .1;
+    }
+    //Rotation
+    if (key == 'r') {
+        if (rotation) {
+            rotation = false;
+        }else{
+            rotation = true;
+        }
+    }
+    if(key == 'y'){
+        rotationV  = Vector(0,1,0);
+        rotationA = 0;
+    }
+    //Datei speichern
+    if (key == 13) {
+        scene.saveFile();
+    }
+}
+
+void SpecialCallback(int key,int x,int y){
+    if (key == GLUT_KEY_UP) {
+        translation.Y += .5;
+    }
+    if (key == GLUT_KEY_DOWN) {
+        translation.Y -= .5;
+    }
+    if (key == GLUT_KEY_RIGHT) {
+        rotationA += .2;
+    }
+    if (key == GLUT_KEY_LEFT) {
+        rotationA -= .1;
+    }
+}
+
+void coutMatrix(Matrix &matrix){
+    for (int i = 0; i < 16; i++) {
+        cout << matrix.m[i] << endl;
+    }
+}
+
+//Funktion zum Setzen der Vektoren des aktiven Objektes, um diese transformieren zu können
+void resetVectors(){
+    translation = scene.getObjectByName(scene.activeObject).getTranslation();
+
+    scalingFactor = 1;
+    
+    scaling = scene.getObjectByName(scene.activeObject).getScaling();
+    
+    rotationV = scene.getObjectByName(scene.activeObject).getRotationVector();
+    rotationA = scene.getObjectByName(scene.activeObject).getRotationAngle();
+    
 }
 
 void MouseCallback(int Button, int State, int x, int y)
 {
     g_MouseButton = Button;
     g_MouseState = State;
-    g_Camera.mouseInput(x,y,Button,State);
+    if(State == GLUT_DOWN && camera ){
+        g_Camera.mouseInput(x,y,Button,State);
+    }
+    //Auswahl des aktiven Objektes
+    if (State == GLUT_UP) {
+        calcMouseRay(x, y);
+        scene.setActiveObject();
+        resetVectors();
+    }
 }
 
 void MouseMoveCallback( int x, int y)
 {
+    if (rotation){
+        rotationA =  x * .01;
+    }
     g_Camera.mouseInput(x,y,g_MouseButton,g_MouseState);
 }
+
+//Transformationsmatrix aktualisieren
+void updateActiveObject(int i){
+    Vector newScaling = Vector(scaling.X * scalingFactor,scaling.Y * scalingFactor, scaling.Z* scalingFactor);
+    scene.objects.at(i).setTranslation(translation);
+    scene.objects.at(i).setScaling(newScaling);
+    scene.objects.at(i).setRotation(rotationV, rotationA);
+    scene.objects.at(i).update();
+}
+
+//Objekte an die richtige Stelle positionieren
+void initObjects(){
+    for(Object& tmp : scene.objects){
+        tmp.update();
+    }
+}
+
+//Mausposition in Vektor umwandeln (gibt nur einen Punkt der x,y Ebene zurück)
+void calcMouseRay(int mouseX, int mouseY) {
+    // Umrechnung des Mauszeigers in den normalisierten Bildraum
+    float viewportX = (2.0f/g_WindowWidth) * (mouseX - (g_WindowWidth*0.5));
+    float viewportY = (2.0f/g_WindowHeight) * (mouseY - (g_WindowHeight*0.5));
+    
+    // Richtungsvektor im Kameraraum bestimmen
+    Matrix invertProjection = g_Camera.getProjectionMatrix();
+    invertProjection.invert();
+    Vector camDirection = invertProjection.transformVec4x4(Vector(viewportX, -viewportY, 0));
+    camDirection.normalize();
+    
+    // Richtungsvektor in Welt-Koordinaten umrechnen
+    Matrix invertViewMatrix = g_Camera.getViewMatrix();
+    invertViewMatrix.invert();
+    worldDirection = invertViewMatrix.transformVec3x3(camDirection);
+    rayOrigin = invertViewMatrix.translation();
+}
+
 

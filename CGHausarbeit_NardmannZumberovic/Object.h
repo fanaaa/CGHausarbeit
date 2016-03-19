@@ -13,6 +13,11 @@
 #include <vector>
 #include "vector.h"
 #include "BoundingBox.h"
+#include "Matrix.h"
+#include "color.h"
+
+extern Vector rayOrigin;
+extern Vector worldDirection;
 
 struct Vertex
 {
@@ -26,6 +31,7 @@ public:
 };
 
 class Object{
+   
 public:
     Object();
     ~Object();
@@ -33,7 +39,10 @@ public:
     const BoundingBox& getBoundingBox() const;
     void createBoundingBox(std::vector<Vertex> vertices);
     void draw();
+    void vDraw();
+
     void update();
+    bool objectIsClicked();
     
     //get-Methoden
     Vector& getTranslation();
@@ -44,6 +53,8 @@ public:
     char* getParentName();
     char* getFileName();
     char* getVectorAsString(Vector& vector);
+    Matrix getMatrix();
+    bool getActive();
     
     //set-Methoden
     void setTranslation(Vector& translation);
@@ -52,21 +63,29 @@ public:
     void setName(char* name);
     void setParentName(char* parentName);
     void setFileName(char* file);
+    void setMatrix(Matrix newMatrix);
+    void setActive(bool boolean);
     
-protected:
+public:
+    Vector hp;
     long indexSize;
     long vertexSize;
+    bool isActiveObject;
     BoundingBox m_Box;
     Vector translation;
     Vector scaling;
     Vector rotationVector;
     vector<Vertex> m_Vertices;
+    vector<unsigned int>m_Indices;
+    vector<Color>m_color;
     float rotationAngle;
     char* name;
     char* parentName;
     char* fileName;
     GLuint m_vertexBuffer;
     GLuint m_indexBuffer;
+    GLuint m_colorBuffer;
+    Matrix m_transMatrix;
 
 };
 #endif /* Object_h */

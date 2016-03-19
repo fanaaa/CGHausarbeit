@@ -31,7 +31,9 @@ Vertex::Vertex( const Vector& p, const Vector& n, float u, float v){
     v = v;
 }
 
-Object::Object() : name(new char[256]), parentName(new char[256]), fileName(new char[256]), rotationAngle(0), rotationVector(), scaling(), translation(), indexSize(0), vertexSize(0){
+Object::Object() : name(new char[256]), parentName(new char[256]), fileName(new char[256]), rotationAngle(0), rotationVector(Vector(0,0,0)), scaling(Vector(1,1,1)), translation(Vector(0,0,0)), indexSize(0), vertexSize(0){
+    this->m_transMatrix.identity();
+    this->isActiveObject = false;
 
 }
 
@@ -64,7 +66,6 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
     vector<Texcoord> vts;
     unsigned int pidx[4];
     unsigned int tidx[4];
-    
     FILE * object = fopen(Filename, "r");
     if(object == NULL){
         cout << " Konnte Datei nicht oeffnen!" << endl;
@@ -111,12 +112,16 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
                         indexBuffer.push_back(pidx[3]-1);
                         indexBuffer.push_back(pidx[0]-1);
                         
+                        
                     }
                 }
                 
                 
             }
         }
+        
+        
+        m_Indices = indexBuffer;
         
         //Normale berechnen
         Vector normal;
@@ -131,6 +136,7 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
         }
         
         
+        
         //Objekte Grundskalieren
         this->createBoundingBox(m_Vertices);
         float scale = 5 / ((m_Box.Min - m_Box.Max).length());
@@ -138,11 +144,16 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
             m_Vertices[i].Position = m_Vertices[i].Position * scale;
         }
         
+        
         this->indexSize = indexBuffer.size();
         
         glGenBuffers( 1, &m_vertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*m_Vertices.size(), &m_Vertices[0], GL_STATIC_DRAW );
+        
+        glGenBuffers(1, &m_colorBuffer);
+        glBindBuffer(GL_COLOR_ARRAY, m_colorBuffer);
+        glBufferData(GL_COLOR_ARRAY, sizeof(Color)*m_Vertices.size(), &m_color[0], GL_STATIC_DRAW);
         
         glGenBuffers( 1, &m_indexBuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
@@ -153,7 +164,18 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
     
 }
 
+void Object::vDraw(){
+    glPushMatrix();
+    glMultMatrixf(this->m_transMatrix);
+    draw();
+    glPopMatrix();
+}
+
+
 void Object::draw(){
+
+
+    
     // inform the client that we want to use array buffers
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
@@ -161,19 +183,21 @@ void Object::draw(){
     
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
     // setup position & normal pointers
     
     glVertexPointer( 3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
     glNormalPointer( GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(12));
     
-    glDrawElements( GL_TRIANGLES, this->indexSize , GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
+    if(this->isActiveObject){
+        glDrawElements(GL_LINES, this->indexSize, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+    }else {
+        glDrawElements( GL_TRIANGLES, this->indexSize , GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
+    }
     
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    
+   
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
@@ -197,6 +221,42 @@ void Object::createBoundingBox(std::vector<Vertex> vertices){
 }
 
 void Object::update(){
+    
+    //Translate,Rotate,Scale
+    Matrix TM;
+    Matrix SM;
+    Matrix RM;
+    
+    TM.identity();
+    SM.identity();
+    RM.identity();
+    
+    TM.translation(this->translation);
+    SM.scale(this->scaling);
+    RM.rotationAxis(this->rotationVector, this->rotationAngle);
+    
+    this->m_transMatrix =  TM * SM * RM;
+}
+
+//Überprüfen eines geklickten Objetkes über Triangle-Intersection
+bool Object::objectIsClicked(){
+    for (int i = 0; i <  this->m_Indices.size()/ 3 ; i++) {
+   
+        Vector a = m_Vertices.at(m_Indices[3*i]).Position;
+        Vector b = m_Vertices.at(m_Indices[3*i+1]).Position;
+        Vector c = m_Vertices.at(m_Indices[3*i+2]).Position;
+        
+        //Transformationsmatrix anwenden
+        a = m_transMatrix * a;
+        b = m_transMatrix * b;
+        c = m_transMatrix * c;
+
+         float s;
+        if (rayOrigin.triangleIntersection(worldDirection, a, b, c, s)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 //setter
@@ -223,6 +283,14 @@ void Object::setParentName(char *parentName){
 
 void Object::setFileName(char *file){
     this->fileName = file;
+}
+
+void Object::setMatrix(Matrix newMatrix){
+    this->m_transMatrix = newMatrix;
+}
+
+void Object::setActive(bool boolean){
+    this->isActiveObject = boolean;
 }
 
 //getter
@@ -254,8 +322,16 @@ char* Object::getFileName(){
     return this->fileName;
 }
 
+Matrix Object::getMatrix(){
+    return this->m_transMatrix;
+}
+
 char* Object::getVectorAsString(Vector& vector){
     char* string;
     
     return string;
+}
+
+bool Object::getActive(){
+    return this->isActiveObject;
 }

@@ -17,6 +17,9 @@ using namespace std;
 #include "Texture.h"
 #include "Object.h"
 
+extern Vector rayOrigin;
+extern Vector worldDirection;
+
 class Scene{
 public:
     Vector size;
@@ -25,13 +28,19 @@ public:
     int u;
     int v;
     vector<Object> objects;
-    Object objekts; //zum Testen der Datei
+    char* activeObject;
     
+    //Methoden
     Scene();
     Scene(const char* Filename);
     ~Scene();
     bool parseFile();
     bool saveFile();
-    void coutObject();
+    Object& getObjectByName(char* objName);
+    void setActiveObject();
+    
+    //Hilfsmethoden saveFile
+    void writeObjectHeader(FILE* file,Object obj);
+    void writeObjectTransformations(FILE* file, Object obj);
 };
 #endif /* Scene_h */
