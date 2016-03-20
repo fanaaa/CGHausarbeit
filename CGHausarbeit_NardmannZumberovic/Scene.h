@@ -14,7 +14,7 @@ using namespace std;
 
 
 #include "vector.h"
-#include "Texture.h"
+#include "Room.h"
 #include "Object.h"
 
 extern Vector rayOrigin;
@@ -22,13 +22,11 @@ extern Vector worldDirection;
 
 class Scene{
 public:
-    Vector size;
-    Texture wallpaper;
     const char* filename;
-    int u;
-    int v;
     vector<Object> objects;
     char* activeObject;
+    Room room;
+ 
     
     //Methoden
     Scene();
@@ -40,6 +38,7 @@ public:
     void setActiveObject();
     
     //Hilfsmethoden saveFile
+    void writeRoom(FILE* file,Room room);
     void writeObjectHeader(FILE* file,Object obj);
     void writeObjectTransformations(FILE* file, Object obj);
 };

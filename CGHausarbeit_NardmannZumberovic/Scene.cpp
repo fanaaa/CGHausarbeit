@@ -21,6 +21,10 @@ Scene::Scene(const char* Filename){
 Scene::~Scene(){
 }
 
+Scene::Scene(){
+
+}
+
 bool Scene::parseFile(){
     int result;
     FILE * file = fopen(this->filename, "r");
@@ -47,12 +51,23 @@ bool Scene::parseFile(){
                 if(strcmp(lineHeader,"size") == 0){
                     Vector size;
                     fscanf(file, "%f %f %f\n", &size.X,&size.Y,&size.Z);
-                }else if(strcmp(lineHeader, "texture") == 0){
-                    char bmpFileName[256];
-                    fscanf(file, "%s\n", bmpFileName);
-                }else if(strcmp(lineHeader, "tiling") == 0){
-                    fscanf(file, "%i %i\n",&this->u,&this->v);
-                    //Objekt
+                    this->room = Room(size.X, size.Y, size.Z);
+                }else if(strcmp(lineHeader, "walltex") == 0){
+                    char* wallTex = new char[256];
+                    fscanf(file, "%s\n", wallTex);
+                    room.setWallTex(wallTex);
+                }else if(strcmp(lineHeader, "walltiling") == 0){
+                    tiling tmp;
+                    fscanf(file, "%f %f\n",&tmp.u,&tmp.v);
+                    room.setWallTiling(tmp.u, tmp.v);
+                }else if(strcmp(lineHeader, "floortex") == 0){
+                    char* floorTex = new char[256];
+                    fscanf(file, "%s\n", floorTex);
+                    room.setFloorTex(floorTex);
+                }else if(strcmp(lineHeader, "floortiling") == 0){
+                    tiling tmp2;
+                    fscanf(file, "%f %f\n",&tmp2.u,&tmp2.v);
+                    room.setFloorTiling(tmp2.u, tmp2.v);
                 }else if(strcmp(lineHeader, "object") == 0){
                     char *objName = new char[256];
                     fscanf(file, "%s\n", objName);
@@ -108,7 +123,7 @@ bool Scene::saveFile(){
         return false;
     }else{
         //Room
-        
+        this->writeRoom(file, this->room);
         //Object
         for(Object tmp : this->objects){
             this->writeObjectHeader(file,tmp);
@@ -147,6 +162,36 @@ void Scene::writeObjectHeader(FILE *file, Object obj){
     strcat(objectHeader, "\n");
     fprintf(file, objectHeader);
 }
+
+void Scene::writeRoom(FILE *file,Room room){
+    char roomWrite[1024] = "";
+    char size[128] = "";
+    char walltex[128] = "";
+    char walltiling[128] = "";
+    char floortex[128] = "";
+    char floortiling[128] = "";
+    sprintf(size, "%s %f %f %f","size",room.getWidth(),room.getHeight(),room.getLength());
+    strcat(size, "\n");
+    sprintf(walltex, "%s %s","walltex",room.getWallName());
+    strcat(walltex, "\n");
+    sprintf(walltiling, "%s %f %f","walltiling",room.getWallTiling().u,room.getWallTiling().v);
+    strcat(walltiling, "\n}\n");
+    sprintf(floortex, "%s %s","floortex",room.getFloorName());
+    sprintf(floortiling, "%s %f %f","floortiling",room.getWallTiling().u,room.getWallTiling().v);
+    
+    strcat(roomWrite, "room\n{\n");
+    strcat(roomWrite, size);
+    strcat(roomWrite, "wallpaper\n{\nwall\n{\n");
+    strcat(roomWrite, walltex);
+    strcat(roomWrite, walltiling);
+    strcat(roomWrite, "floor\n{\n");
+    strcat(roomWrite, floortex);
+    strcat(roomWrite, "\n");
+    strcat(roomWrite, floortiling);
+    strcat(roomWrite, "\n}\n}\n}\n");
+    fprintf(file, roomWrite);
+}
+
 
 void Scene::writeObjectTransformations(FILE *file, Object obj){
     char objectBody[1024] = "";

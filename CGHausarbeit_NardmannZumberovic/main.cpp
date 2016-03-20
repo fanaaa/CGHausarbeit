@@ -81,8 +81,9 @@ int main(int argc,char * argv[]) {
     scene.activeObject = "Puppe";
     initObjects();
     resetVectors();
-    room.loadWall("/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/tapete.bmp",1.0f, 1.0f);
-    room.loadFloor("/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/boden.bmp",4.0f, 3.0f);
+    
+    scene.room.loadWall();
+    scene.room.loadFloor();
     
     
     glutDisplayFunc(DrawScene);
@@ -175,7 +176,7 @@ void DrawObjects(){
 
 //Raum darstellen
 void DrawRoom(){
-    room.drawRoom();
+    scene.room.drawRoom();
 }
 
 

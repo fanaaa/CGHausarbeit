@@ -7,38 +7,42 @@
 //
 
 #include "Room.h"
+#include <string>
+
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-Room::Room(){}
+Room::Room() : wallTex(new char[512]), floorTex(new char[512]), texturePath(new char[512]), floorName(new char[512]), wallName(new char[512]){
+}
 
-Room::Room(float x, float y, float z){
+Room::Room(float x, float y, float z) : wallTex(new char[512]), floorTex(new char[512]),floorName(new char[512]), wallName(new char[512]){
     this->width = x;
     this->height = y;
     this->length = z;
+    this->texturePath = "/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/";
 }
 
 Room::~Room(){}
 
-bool Room::loadWall(const char* texture, float u, float v){
+bool Room::loadWall(){
     
     Texture wallpaper;
 
     RVertex wallVertices[12]{
         //first wall
         {Vector(-width,0,-length), Vector(0,0,0), 0, 0},
-        {Vector(-width,height,-length), Vector(0,0,0), 0, v},
-        {Vector(-width,0,length), Vector(0,0,0), u, 0},
-        {Vector(-width,height,length), Vector(0,0,0), u, v},
+        {Vector(-width,height,-length), Vector(0,0,0), 0, this->wallTiling.v},
+        {Vector(-width,0,length), Vector(0,0,0), this->wallTiling.u, 0},
+        {Vector(-width,height,length), Vector(0,0,0), this->wallTiling.u, this->wallTiling.v},
         //second wall
         {Vector(-width,0,length), Vector(0,0,0), 0, 0},
-        {Vector(-width,height,length), Vector(0,0,0), 0, v},
-        {Vector(width,0,length), Vector(0,0,0), u, 0},
-        {Vector(width,height,length), Vector(0,0,0), u, v},
+        {Vector(-width,height,length), Vector(0,0,0), 0, this->wallTiling.v},
+        {Vector(width,0,length), Vector(0,0,0), this->wallTiling.u, 0},
+        {Vector(width,height,length), Vector(0,0,0), this->wallTiling.u, this->wallTiling.v},
         //third wall
-        {Vector(width,0,length), Vector(0,0,0), u, 0},
-        {Vector(width,height,length), Vector(0,0,0), u, v},
+        {Vector(width,0,length), Vector(0,0,0), this->wallTiling.u, 0},
+        {Vector(width,height,length), Vector(0,0,0), this->wallTiling.u, this->wallTiling.v},
         {Vector(width,0,-length), Vector(0,0,0), 0, 0},
-        {Vector(width,height,-length), Vector(0,0,0), 0, v},
+        {Vector(width,height,-length), Vector(0,0,0), 0, this->wallTiling.v},
     };
     
     unsigned int wallIndices[18] ={0,1,3,0,3,2,6,4,5,6,5,7,8,9,11,8,11,10,};
@@ -64,7 +68,11 @@ bool Room::loadWall(const char* texture, float u, float v){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, wallIndexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*24, wallIndices, GL_STATIC_DRAW);
     
-    if(!wallpaper.LoadFromBMP(texture)) {
+    
+   // std::cout << texture << std::endl;
+    std::cout << this->wallTex << std::endl;
+    
+    if(!wallpaper.LoadFromBMP(this->wallTex)) {
         return false;
     }
     
@@ -73,15 +81,15 @@ bool Room::loadWall(const char* texture, float u, float v){
     return true;
 }
 
-bool Room::loadFloor(const char* texture, float u, float v){
+bool Room::loadFloor(){
     
     Texture wallpaper;
     RVertex floorVertices[4] =
     {
         {Vector(-width,0,-length), Vector(0,0,0), 0, 0},
-        {Vector(-width,0,length), Vector(0,0,0), 0, v},
-        {Vector(width,0,-length), Vector(0,0,0), u, 0},
-        {Vector(width,0,length), Vector(0,0,0), u, v}
+        {Vector(-width,0,length), Vector(0,0,0), 0, this->floorTiling.v},
+        {Vector(width,0,-length), Vector(0,0,0), this->floorTiling.u, 0},
+        {Vector(width,0,length), Vector(0,0,0), this->floorTiling.u, this->floorTiling.v}
     };
     
     unsigned int floorIndices[6] = {0,1,3,0,3,2};
@@ -107,7 +115,7 @@ bool Room::loadFloor(const char* texture, float u, float v){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*6, floorIndices, GL_STATIC_DRAW);
     
-    if(!wallpaper.LoadFromBMP(texture)) {
+    if(!wallpaper.LoadFromBMP(this->floorTex)) {
         return false;
     }
     
@@ -164,3 +172,63 @@ void Room::drawRoom(){
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
+
+//setter
+
+void Room::setFloorTex(char *floor){
+    this->floorName = floor;
+    strcat(this->floorTex, this->texturePath);
+    strcat(this->floorTex, floor);
+    
+}
+
+void Room::setWallTex(char *wall){
+    this->wallName = wall;
+    strcat(this->wallTex, this->texturePath);
+    strcat(this->wallTex, wall);
+}
+
+void Room::setFloorTiling(float u, float v){
+    this->floorTiling.u = u;
+    this->floorTiling.v = v;
+}
+
+void Room::setWallTiling(float u, float v){
+    this->wallTiling.u = u;
+    this->wallTiling.v = v;
+}
+
+//getter
+char* Room::getFloorTex(){
+    return this->floorTex;
+}
+
+char* Room::getWallTex(){
+    return this->wallTex;
+}
+
+char* Room::getFloorName(){
+    return this->floorName;
+}
+
+char* Room::getWallName(){
+    return this->wallName;
+}
+
+float Room::getWidth(){
+    return this->width;
+}
+float Room::getHeight(){
+    return this->height;
+}
+float Room::getLength(){
+    return this->length;
+}
+
+tiling Room::getWallTiling(){
+    return this->wallTiling;
+}
+
+tiling Room::getFloorTiling(){
+    return this->floorTiling;
+}
