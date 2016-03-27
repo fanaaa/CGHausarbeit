@@ -40,7 +40,7 @@ bool Scene::parseFile(){
     int result;
     FILE * file = fopen(this->filename, "r");
     if(file == NULL){
-        cout << "Konnte Datei nicht oeffnen!" << endl;
+        cout << "Konnte Datei nicht oeffnen! - parseFile" << endl;
         cout << getcwd(NULL, 0) << endl;
         perror("fopen");
         return false;

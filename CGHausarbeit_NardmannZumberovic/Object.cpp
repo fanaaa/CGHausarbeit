@@ -89,7 +89,7 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
     FILE * object = fopen(Filename, "r");
     
     if(object == NULL){
-        cout << " Konnte Datei nicht oeffnen!" << endl;
+        cout << " Konnte Datei nicht oeffnen! - loadObject" << endl;
         cout << getcwd(NULL, 0) << endl;
         perror("fopen");
         return false;
@@ -331,7 +331,7 @@ bool Object::loadMaterialFile(const char* Filename){
     FILE* material = fopen(Filename,"r");
     int result;
     if(material == NULL){
-        cout << " Konnte Datei nicht oeffnen!" << endl;
+        cout << " Konnte Datei nicht oeffnen! - loadMaterialFile" << endl;
         cout << getcwd(NULL, 0) << endl;
         perror("fopen");
         return false;

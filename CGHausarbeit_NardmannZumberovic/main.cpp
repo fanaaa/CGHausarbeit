@@ -44,6 +44,7 @@ Vector worldDirection;
 int doubleClick = 1;
 int zoom = 1;
 bool debug = false;
+bool alt = false;
 
 //Methodendeklaration
 void DrawScene();
@@ -199,25 +200,50 @@ void DrawRoom(){
  Tastatursteurung der Transformationen
  */
 void KeyboardCallback( unsigned char key, int x, int y){
+    int mod = glutGetModifiers();
     //Translation
     if (key == 'w') {
-        translation.Z += .05;
+        if (mod == 4) {
+            translation.Z += .3;
+        }else{
+            translation.Z += .05;
+        }
     }
     if (key == 's') {
-        translation.Z -= .05;
+        if (mod == 4) {
+            translation.Z -= .3;
+        }else{
+            translation.Z -= .05;
+        }
     }
     if (key == 'a') {
-        translation.X += .05;
+        if (mod == 4) {
+            translation.X += .3;
+        }else{
+            translation.X += .05;
+        }
     }
     if (key == 'd') {
-        translation.X -= .05;
+        if (mod == 4) {
+            translation.X -= .3;
+        }else{
+            translation.X -= .05;
+        }
     }
     //Scaling
     if (key == '+') {
-        scalingFactor += .1;
+        if (mod == 4) {
+            scalingFactor += .2;
+        }else{
+            scalingFactor += .05;
+        }
     }
     if (key == '-') {
-        scalingFactor -= .1;
+        if (mod == 4) {
+            scalingFactor -= .2;
+        }else{
+            scalingFactor -= .05;
+        }
     }
     if(key == 'z'){
         zoom = 0;
@@ -240,18 +266,37 @@ void KeyboardCallback( unsigned char key, int x, int y){
  Rotationstransformation entlang der y-Achse und Translation entlang der y-Achse.
  */
 void SpecialCallback(int key,int x,int y){
+    //Bei gedrückter Alt-Taste werden die Transformationen mit größerem Faktor durchgeführt
+    int mod = glutGetModifiers();
     if (key == GLUT_KEY_UP) {
-        translation.Y += .05;
+        if (mod == 4) {
+            translation.Y += .3;
+        }else{
+            translation.Y += .05;
+        }
     }
     if (key == GLUT_KEY_DOWN) {
-        translation.Y -= .05;
+        if (mod == 4) {
+            translation.Y -= .3;
+        }else{
+            translation.Y -= .05;
+        }
     }
     if (key == GLUT_KEY_RIGHT) {
-        rotationA += .01;
+        if (mod == 4) {
+            rotationA += .2;
+        }else{
+            rotationA += .05;
+        }
     }
     if (key == GLUT_KEY_LEFT) {
-        rotationA -= .01;
+        if (mod == 4) {
+            rotationA -= .2;
+        }else{
+            rotationA -= .05;
+        }
     }
+
 }
 
 /*

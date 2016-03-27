@@ -33,7 +33,7 @@ Room::Room(float x, float y, float z) : wallTex(new char[512]), floorTex(new cha
     this->width = x;
     this->height = y;
     this->length = z;
-    this->texturePath = "/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/";
+    this->texturePath = "./Texturen/";
 }
 
 /*
