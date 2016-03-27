@@ -43,6 +43,7 @@ Vector rayOrigin;
 Vector worldDirection;
 int doubleClick = 1;
 int zoom = 1;
+bool debug = false;
 
 //Methodendeklaration
 void DrawScene();
@@ -123,39 +124,37 @@ void DrawScene(){
  Methode zum Setzen der Licht und Shader Einstellungen.
  */
 void SetupSettings(){
-        glClearColor(0, 0, 0, 255);
-        glClearDepth(1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+    glClearColor(0, 0, 0, 255);
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(65, (double)g_WindowWidth/(double)g_WindowHeight, 0.045f, 1000.0f);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     
-        glCullFace(GL_BACK);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluPerspective(65, (double)g_WindowWidth/(double)g_WindowHeight, 0.045f, 1000.0f);
-        
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        
-        // Setup Light Color
-        GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 0.0f };
-        GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 0.0f };
-        glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-        glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-        
-        // Setup default material
-        float diff[4] = {1,1,1,1};
-        float amb[4]  = {0.2f,0.2f,0.2f,1};
-        float spec[4] = {0.5f,0.5f,0.5f,1};
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
-        glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
-        glMateriali(GL_FRONT, GL_SHININESS, 30);
-        glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-        
-        glShadeModel(GL_SMOOTH);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
+    // Setup Light Color
+    GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 0.0f };
+    GLfloat diffuseLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat specularLight[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    
+    // Setup default material
+    float diff[4] = {1,1,1,1};
+    float amb[4]  = {0.2f,0.2f,0.2f,1};
+    float spec[4] = {0.5f,0.5f,0.5f,1};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+    glMateriali(GL_FRONT, GL_SHININESS, 30);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_NORMALIZE);
     
     
 }
@@ -228,6 +227,9 @@ void KeyboardCallback( unsigned char key, int x, int y){
     if (key == 13) {
         scene.saveFile();
     }
+    if(key == 't'){
+
+    }
 }
 
 /*
@@ -272,10 +274,10 @@ void MouseCallback(int Button, int State, int x, int y)
     g_MouseButton = Button;
     g_MouseState = State;
     if(State == GLUT_DOWN){
-        if(zoom == 0 && doubleClick == 0){
+        if(zoom == 0 && doubleClick == 0 && debug == true){
             g_MouseButton = GLUT_MIDDLE_BUTTON;
             g_MouseState = GLUT_DOWN;
-            g_Camera.mouseInput(x, 1200, g_MouseButton, g_MouseState);
+            g_Camera.zoom(1);
             
         }
     }

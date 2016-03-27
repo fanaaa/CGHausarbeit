@@ -40,7 +40,7 @@ Vertex::Vertex( const Vector& p, const Vector& n, float u, float v){
     v = v;
 }
 
-Object::Object() : name(new char[256]), parentName(new char[256]), fileName(new char[256]), rotationAngle(0), rotationVector(Vector(0,0,0)), scaling(Vector(1,1,1)), translation(Vector(0,0,0)), indexSize(0), vertexSize(0){
+Object::Object() : name(new char[256]), parentName(new char[256]), fileName(new char[256]), rotationAngle(0), rotationVector(Vector(0,0,0)), scaling(Vector(1,1,1)), translation(Vector(0,0,0)), indexSize(0), vertexSize(0), m_MaterialCount(0), m_pMaterials(new Material[20]){
     this->m_transMatrix.identity();
     this->isActiveObject = false;
 
@@ -103,6 +103,10 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
                 if (strcmp(lineHeader, "v") == 0){
                     fscanf(object, "%a %a %a\n", &vertex.Position.X,&vertex.Position.Y,&vertex.Position.Z);
                     m_Vertices.push_back(vertex);
+                }else if(strcmp(lineHeader, "mtllib") == 0){
+                    char mtllib[30];
+                    fscanf(object, "%s", mtllib);
+                    this->loadMaterialFile(mtllib);
                 }else if (strcmp(lineHeader, "vt") == 0){
                     Texcoord vt;
                     fscanf(object, "%a %a\n", &vt.s,&vt.t);
@@ -138,10 +142,9 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
                     }
                 }
                 
-                
             }
         }
-        
+
         
         this->m_Indices = indexBuffer;
         
@@ -210,12 +213,43 @@ void Object::draw(){
     
     glVertexPointer( 3, GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(0));
     glNormalPointer( GL_FLOAT, sizeof(Vertex), BUFFER_OFFSET(12));
-    
+        float diff[4];
+        float amb[4];
+        float spec[4];
+        for(int i = 0; i < m_MaterialCount; i++){
+            diff[0] = m_pMaterials[i].getDiffuseColor().R;
+            diff[1] = m_pMaterials[i].getDiffuseColor().G;
+            diff[2] = m_pMaterials[i].getDiffuseColor().B;
+            diff[3] = 0;
+            
+            amb[0] = m_pMaterials[i].getAmbientColor().R;
+            amb[1] = m_pMaterials[i].getAmbientColor().G;
+            amb[2] = m_pMaterials[i].getAmbientColor().B;
+            amb[3] = 0;
+            
+            spec[0] = m_pMaterials[i].getSpecularColor().R;
+            spec[1] = m_pMaterials[i].getSpecularColor().G;
+            spec[2] = m_pMaterials[i].getSpecularColor().B;
+            spec[3] = 0;
+            
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, diff);
+            glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+            glMateriali(GL_FRONT, GL_SHININESS, m_pMaterials[i].getSpecularExponent());
+            glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
+        }
     if(this->isActiveObject){
         glDrawElements(GL_LINES, this->indexSize, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
     }else {
         glDrawElements(GL_TRIANGLES, this->indexSize , GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
     }
+    //Normalwerte zurücksetzen
+    float defDiff[4] = {1,1,1,1};
+    float defAmb[4]  = {0.2f,0.2f,0.2f,1};
+    float defSpec[4] = {0.5f,0.5f,0.5f,1};
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, defDiff);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, defSpec);
+    glMateriali(GL_FRONT, GL_SHININESS, 30);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, defAmb);
     
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);
@@ -288,6 +322,82 @@ bool Object::objectIsClicked(){
     }
     return false;
 }
+
+/*
+ Hilfsmethode zum Laden des Materials
+ Parameter: Filename - Name der Materialdatei
+ */
+bool Object::loadMaterialFile(const char* Filename){
+    FILE* material = fopen(Filename,"r");
+    int result;
+    if(material == NULL){
+        cout << " Konnte Datei nicht oeffnen!" << endl;
+        cout << getcwd(NULL, 0) << endl;
+        perror("fopen");
+        return false;
+    }else{
+        while (1) {
+            char lineHeader[256];
+            result = fscanf(material, "%s", lineHeader);
+            if(result == EOF){
+                break;
+            }else{
+                if(strcmp(lineHeader, "newmtl")){
+                    loadMaterial(material);
+                    m_MaterialCount++;
+                }
+            }
+            fclose(material);
+        }
+        return true;
+    }
+}
+
+/*
+ Methode zum Einlesen der mtl-Datei und speichern des Materials im Objekt.
+ Parameter: FILE* - Zeiger zur aktuell geöffneten Materialdatei.
+ */
+bool Object::loadMaterial(FILE*  materialfile){
+    Material m;
+    char lineHeader[256];
+    int result;
+    while (1) {
+        char lineHeader[256];
+        result = fscanf(materialfile, "%s", lineHeader);
+        if(result == EOF){
+            break;
+        }else{
+            if(strcmp(lineHeader, "newmtl") == 0){
+                char name[128];
+                fscanf(materialfile, "%s",name);
+                m.setName(name);
+            }else if (strcmp(lineHeader, "NS")== 0){
+                float Ns;
+                fscanf(materialfile, "%f",&Ns);
+                m.setSpecularExponent(Ns);
+            }else if(strcmp(lineHeader, "Ka") == 0){
+                float Ka1,Ka2, Ka3;
+                fscanf(materialfile, "%f %f %f", &Ka1,&Ka2,&Ka3);
+                Color ka = Color(Ka1,Ka2,Ka3);
+                m.setAmbientColor(ka);
+            }else if(strcmp(lineHeader, "Kd")== 0){
+                float Kd1, Kd2, Kd3;
+                fscanf(materialfile, "%f %f %f",&Kd1,&Kd2,&Kd3);
+                Color kd = Color(Kd1,Kd2,Kd3);
+                m.setDiffuseColor(kd);
+            }else if(strcmp(lineHeader, "Ks") == 0){
+                float Ks1,Ks2,Ks3;
+                fscanf(materialfile, "%f %f %f",&Ks1,&Ks2,&Ks3);
+                Color ks = Color(Ks1,Ks2,Ks3);
+                m.setSpecularColor(ks);
+            }
+        }
+    }
+    m_pMaterials[m_MaterialCount] = m;
+    return true;
+}
+
+
 
 /*
  Set-Methoden

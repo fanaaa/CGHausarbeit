@@ -36,7 +36,7 @@ public:
     void apply();
     const Matrix& getViewMatrix() const;
     const Matrix& getProjectionMatrix() const;
-protected:
+public:
     void pan( float dx, float dy);
     void zoom( float dz);
     void rotate( float x, float y );

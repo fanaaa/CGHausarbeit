@@ -14,10 +14,11 @@
 #include "vector.h"
 #include "BoundingBox.h"
 #include "Matrix.h"
+#include "Material.h"
 
 extern Vector rayOrigin;
 extern Vector worldDirection;
-
+extern bool textures;
 struct Vertex
 {
 public:
@@ -28,6 +29,7 @@ public:
     float  u;
     float  v;
 };
+
 
 class Object{
    
@@ -42,6 +44,8 @@ public:
 
     void update();
     bool objectIsClicked();
+    bool loadMaterialFile(const char* Filename);
+    bool loadMaterial(FILE* materialfile);
     
     //get-Methoden
     Vector& getTranslation();
@@ -65,7 +69,7 @@ public:
     void setMatrix(Matrix newMatrix);
     void setActive(bool boolean);
     
-public:
+protected:
     Vector hp;
     long indexSize;
     long vertexSize;
@@ -84,6 +88,8 @@ public:
     GLuint m_indexBuffer;
     GLuint m_colorBuffer;
     Matrix m_transMatrix;
+    Material* m_pMaterials;
+    unsigned int m_MaterialCount;
 
 };
 #endif /* Object_h */
