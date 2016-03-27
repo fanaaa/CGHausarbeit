@@ -33,7 +33,7 @@ Vector rotationV;
 float rotationA;
 Vector scaling;
 float scalingFactor;
-Scene scene = Scene("test.osh");
+Scene scene = Scene("Scene.osh");
 const Vector g_LightPos = Vector( 0,4,0);
 Camera g_Camera;
 int g_MouseButton = 0;
@@ -228,7 +228,11 @@ void KeyboardCallback( unsigned char key, int x, int y){
         scene.saveFile();
     }
     if(key == 't'){
-
+        if(debug){
+            debug = false;
+        }else{
+            debug = true;
+        }
     }
 }
 
@@ -283,7 +287,7 @@ void MouseCallback(int Button, int State, int x, int y)
     }
     //Auswahl des aktiven Objektes
     if (State == GLUT_UP) {
-        if(doubleClick == 0){
+        if(doubleClick == 0 && debug == true){
             //Kamera auf Objekt zoomen
             g_MouseButton = GLUT_MIDDLE_BUTTON;
             g_Camera.setPosition(rayOrigin);
