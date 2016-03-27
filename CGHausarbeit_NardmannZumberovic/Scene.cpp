@@ -14,17 +14,28 @@
 #include <iostream>
 #include <float.h>
 
+/*
+ Überladener Konstruktor
+ */
 Scene::Scene(const char* Filename){
     this->filename = Filename;
 }
 
+/*
+ Destruktor
+ */
 Scene::~Scene(){
 }
 
+/*
+ Standardkonstruktor
+ */
 Scene::Scene(){
 
 }
-
+/*
+    Methode zum Einlesen der Szenendatei.
+ */
 bool Scene::parseFile(){
     int result;
     FILE * file = fopen(this->filename, "r");
@@ -99,6 +110,7 @@ bool Scene::parseFile(){
             }
         }
         
+        //Objekt zusammensetzen
         for(int i = 0; i < objNames.size(); i++){
             Object object;
             object.setName(objNames[i]);
@@ -113,7 +125,9 @@ bool Scene::parseFile(){
     }
 }
 
-//Aktuelle Positionen in Datei speichern
+/*
+ Methode zum Speichern der aktuellen Szene in einer Szenendatei mit Endung .osh.
+ */
 bool Scene::saveFile(){
     FILE * file = fopen(this->filename, "w");
     if(file == NULL){
@@ -135,7 +149,10 @@ bool Scene::saveFile(){
 }
 
 
-
+/*
+ Methode zur Ermittlung eines Objektes nach Namen.
+ Parameter: objName - Objektname des zu suchenden Objektes.
+ */
 Object& Scene::getObjectByName(char* objName){
     Object& tmp = this->objects.at(0);
     for (Object& tmp : this->objects) {
@@ -146,6 +163,9 @@ Object& Scene::getObjectByName(char* objName){
     return tmp;
 }
 
+/*
+ Methoden zum Setzen des aktiven Objektes, nach Ermittlung der Mausinteraktion.
+ */
 void Scene::setActiveObject(){
     for(Object& tmp : this->objects){
         if(tmp.objectIsClicked()){
@@ -155,6 +175,9 @@ void Scene::setActiveObject(){
     }
 }
 
+/*
+ Hilfsmethode zum Zusammensetzen der Objektzeilen der osh-Datei.
+ */
 void Scene::writeObjectHeader(FILE *file, Object obj){
     char objectHeader[124] = "";
     strcat(objectHeader, "object ");
@@ -163,6 +186,9 @@ void Scene::writeObjectHeader(FILE *file, Object obj){
     fprintf(file, objectHeader);
 }
 
+/*
+ Hilfsmethode zum Zusammensetzen der Raumdaten der osh-Datei.
+ */
 void Scene::writeRoom(FILE *file,Room room){
     char roomWrite[1024] = "";
     char size[128] = "";
@@ -192,7 +218,11 @@ void Scene::writeRoom(FILE *file,Room room){
     fprintf(file, roomWrite);
 }
 
-
+/*
+ Hilfsmethode zum Zusammensetzen der Objektdaten der osh-Datei.
+ Parameter: file - geöffnete Dateireferenz zum Schreiben der osh-Datei.
+            obj  - Objekt dessen Daten in die osh-Datei geschrieben werden.
+ */
 void Scene::writeObjectTransformations(FILE *file, Object obj){
     char objectBody[1024] = "";
     char translation [128] = "";

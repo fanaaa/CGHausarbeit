@@ -3,8 +3,11 @@
 //  RoomTest
 //
 //  Created by Fana Zumberovic on 19.01.16.
+//  Collaborator: Philipp Nardmann
 //  Copyright © 2016 HochschuleOsnabrueck. All rights reserved.
 //
+
+
 
 #ifndef Room_h
 #define Room_h
@@ -13,7 +16,6 @@
 #include "vector.h"
 #include <GLUT/GLUT.h>
 #include <OpenGL/OpenGL.h>
-#include "ShaderProgram.h"
 #include "Texture.h"
 struct RVertex{
     Vector pos;

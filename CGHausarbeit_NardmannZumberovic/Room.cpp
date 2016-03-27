@@ -1,19 +1,34 @@
 //
 //  Room.cpp
-//  RoomTest
+//  
 //
 //  Created by Fana Zumberovic on 19.01.16.
+//  Collaborator: Philipp Nardmann
 //  Copyright © 2016 HochschuleOsnabrueck. All rights reserved.
 //
+
+/*
+ Klasse zum Abspeichern der Raumwerte.
+ Der Raum wird, sofern aus der Datei ausgelesen, abgespeichert.
+ Dabei wird die Textur und das entsprechende Tiling verwendet, um Tapete und Raum darzustellen.
+ Die Raumbegrenzung werden als Vertices im VBO dargestellt.
+ */
 
 #include "Room.h"
 #include <string>
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+/*
+ Defaultkonstruktor
+ */
 Room::Room() : wallTex(new char[512]), floorTex(new char[512]), texturePath(new char[512]), floorName(new char[512]), wallName(new char[512]){
 }
 
+/*
+ Überladener Konstruktor.
+ Angabe des Pfadnamens der Textur-Dateien.
+ */
 Room::Room(float x, float y, float z) : wallTex(new char[512]), floorTex(new char[512]),floorName(new char[512]), wallName(new char[512]){
     this->width = x;
     this->height = y;
@@ -21,8 +36,15 @@ Room::Room(float x, float y, float z) : wallTex(new char[512]), floorTex(new cha
     this->texturePath = "/Users/philippnardmann/Library/Developer/Xcode/DerivedData/CGHausarbeit_NardmannZumberovic-cwcfxhjainstwvcfyevmxocyfapd/Build/Products/Debug/";
 }
 
+/*
+ Destruktor
+ */
 Room::~Room(){}
 
+
+/*
+ Methode zum Erstellen des VBOs der Wände des Raumes.
+ */
 bool Room::loadWall(){
     
     Texture wallpaper;
@@ -69,9 +91,6 @@ bool Room::loadWall(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*24, wallIndices, GL_STATIC_DRAW);
     
     
-   // std::cout << texture << std::endl;
-    std::cout << this->wallTex << std::endl;
-    
     if(!wallpaper.LoadFromBMP(this->wallTex)) {
         return false;
     }
@@ -81,6 +100,9 @@ bool Room::loadWall(){
     return true;
 }
 
+/*
+ Methode zum Erstellen des VBOs des Boden des Raumes.
+ */
 bool Room::loadFloor(){
     
     Texture wallpaper;
@@ -124,6 +146,10 @@ bool Room::loadFloor(){
     return true;
 }
 
+
+/*
+ Methode zum Zeichnen des Raumes mit den erstellten VBOs.
+ */
 void Room::drawRoom(){
     // inform the client that we want to use array buffers
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorIndexBuffer);
@@ -173,8 +199,10 @@ void Room::drawRoom(){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-//setter
 
+/*
+ Set-Methoden
+ */
 void Room::setFloorTex(char *floor){
     this->floorName = floor;
     strcat(this->floorTex, this->texturePath);
@@ -198,7 +226,9 @@ void Room::setWallTiling(float u, float v){
     this->wallTiling.v = v;
 }
 
-//getter
+/*
+ Get-Methoden
+ */
 char* Room::getFloorTex(){
     return this->floorTex;
 }

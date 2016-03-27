@@ -14,7 +14,6 @@
 #include "vector.h"
 #include "BoundingBox.h"
 #include "Matrix.h"
-#include "color.h"
 
 extern Vector rayOrigin;
 extern Vector worldDirection;
@@ -77,7 +76,6 @@ public:
     Vector rotationVector;
     vector<Vertex> m_Vertices;
     vector<unsigned int>m_Indices;
-    vector<Color>m_color;
     float rotationAngle;
     char* name;
     char* parentName;

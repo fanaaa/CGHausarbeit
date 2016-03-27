@@ -7,6 +7,11 @@
 //  Copyright © 2015 HochschuleOsnabrueck. All rights reserved.
 //
 
+
+/*
+ Dies ist das Hauptprogramm in dem die Szene verwaltet und als OpenGL-Programm initiiert wird.
+ */
+
 #include <GLUT/GLUT.h>
 #include <OpenGL/OpenGL.h>
 #include <GLUT/GLUT.h>
@@ -15,7 +20,6 @@
 #include "Scene.h"
 #include "Camera.h"
 #include "Room.h"
-#include "ShaderProgram.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -23,7 +27,6 @@
 const unsigned int g_WindowWidth= 1024;
 const unsigned int g_WindowHeight= 768;
 bool rotation = false;
-float angle = 0.0;
 Room room = Room(15.0f, 15.0f, 15.0f);
 Vector translation;
 Vector rotationV;
@@ -35,10 +38,11 @@ const Vector g_LightPos = Vector( 0,4,0);
 Camera g_Camera;
 int g_MouseButton = 0;
 int g_MouseState = 0;
-ShaderProgram shader;
 bool camera = false;
 Vector rayOrigin;
 Vector worldDirection;
+int doubleClick = 1;
+int zoom = 1;
 
 //Methodendeklaration
 void DrawScene();
@@ -57,26 +61,27 @@ void MouseCallback(int Button, int State, int x, int y);
 void MouseMoveCallback(int x, int y);
 void SpecialCallback(int key,int x,int y);
 void initObjects();
-void coutMatrix(Matrix &matrix);
 void calcMouseRay(int x,int y);
+void setDoubleClick(int dClick);
+void setZoom(int z);
 
 
 
 int main(int argc,char * argv[]) {
+    //OpenGl initiieren
     glutInitWindowSize(g_WindowWidth , g_WindowHeight);
     glutInit(&argc, argv);
-    
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
     glutCreateWindow("Raumanwendung");
-    
-    SetupSettings();
-    
     glutKeyboardFunc(KeyboardCallback);
     glutMouseFunc(MouseCallback);
     glutMotionFunc(MouseMoveCallback);
     glutSpecialFunc(SpecialCallback);
 
     
+    SetupSettings();
+    
+    //Eigentliches Programm
     loadObjects();
     scene.activeObject = "Puppe";
     initObjects();
@@ -94,6 +99,9 @@ int main(int argc,char * argv[]) {
     return 0;
 }
 
+/*
+ Loop-Methode die von OpenGL aufgerufen wird.
+ */
 void DrawScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
@@ -111,6 +119,9 @@ void DrawScene(){
     glutPostRedisplay();
 }
 
+/*
+ Methode zum Setzen der Licht und Shader Einstellungen.
+ */
 void SetupSettings(){
         glClearColor(0, 0, 0, 255);
         glClearDepth(1.0f);
@@ -149,7 +160,9 @@ void SetupSettings(){
     
 }
 
-//Raum und Objekte laden
+/*
+ Methode zum Laden der Szenen-Objekte.
+ */
 void loadObjects(){
     scene.parseFile();
     for(Object& tmp : scene.objects){
@@ -157,7 +170,9 @@ void loadObjects(){
     }
 }
 
-//Objekte darstellen
+/*
+ Methode zum Darstellen Objekte. Die eigenen Matrizen werden zum Darstellen der Position auf den Stack gepusht.
+ */
 void DrawObjects(){
     int i = 0;
     for(Object& tmp : scene.objects){
@@ -174,32 +189,29 @@ void DrawObjects(){
     }
 }
 
-//Raum darstellen
+/*
+ Methode zum Zeichnen des Raumes.
+ */
 void DrawRoom(){
     scene.room.drawRoom();
 }
 
-
+/*
+ Tastatursteurung der Transformationen
+ */
 void KeyboardCallback( unsigned char key, int x, int y){
-    //Rotation
-    if (key == 'l'){
-        angle += .5;
-    }
-    if (key == 't'){
-        angle -= .5;
-    }
     //Translation
     if (key == 'w') {
-        translation.Z += .5;
+        translation.Z += .05;
     }
     if (key == 's') {
-        translation.Z -= .5;
+        translation.Z -= .05;
     }
     if (key == 'a') {
-        translation.X += .5;
+        translation.X += .05;
     }
     if (key == 'd') {
-        translation.X -= .5;
+        translation.X -= .05;
     }
     //Scaling
     if (key == '+') {
@@ -208,17 +220,9 @@ void KeyboardCallback( unsigned char key, int x, int y){
     if (key == '-') {
         scalingFactor -= .1;
     }
-    //Rotation
-    if (key == 'r') {
-        if (rotation) {
-            rotation = false;
-        }else{
-            rotation = true;
-        }
-    }
-    if(key == 'y'){
-        rotationV  = Vector(0,1,0);
-        rotationA = 0;
+    if(key == 'z'){
+        zoom = 0;
+        glutTimerFunc(50, setZoom,1);
     }
     //Datei speichern
     if (key == 13) {
@@ -226,55 +230,76 @@ void KeyboardCallback( unsigned char key, int x, int y){
     }
 }
 
+/*
+ Rotationstransformation entlang der y-Achse und Translation entlang der y-Achse.
+ */
 void SpecialCallback(int key,int x,int y){
     if (key == GLUT_KEY_UP) {
-        translation.Y += .5;
+        translation.Y += .05;
     }
     if (key == GLUT_KEY_DOWN) {
-        translation.Y -= .5;
+        translation.Y -= .05;
     }
     if (key == GLUT_KEY_RIGHT) {
-        rotationA += .2;
+        rotationA += .01;
     }
     if (key == GLUT_KEY_LEFT) {
-        rotationA -= .1;
+        rotationA -= .01;
     }
 }
 
-void coutMatrix(Matrix &matrix){
-    for (int i = 0; i < 16; i++) {
-        cout << matrix.m[i] << endl;
-    }
-}
-
-//Funktion zum Setzen der Vektoren des aktiven Objektes, um diese transformieren zu können
+/*
+ Methode zum Setzen der Vektordaten des aktuellen Objektes.
+ */
 void resetVectors(){
     translation = scene.getObjectByName(scene.activeObject).getTranslation();
-
     scalingFactor = 1;
-    
     scaling = scene.getObjectByName(scene.activeObject).getScaling();
-    
     rotationV = scene.getObjectByName(scene.activeObject).getRotationVector();
     rotationA = scene.getObjectByName(scene.activeObject).getRotationAngle();
     
 }
 
+/*
+ Methode zur Maussteuerung
+ Parameter: Button  - gedrückter Mausbutton
+            State   - Status des Mausbuttons
+            x       - X-Position des Mauszeigers
+            y       - Y-Position des Mauszeigers
+ */
 void MouseCallback(int Button, int State, int x, int y)
 {
     g_MouseButton = Button;
     g_MouseState = State;
-    if(State == GLUT_DOWN && camera ){
-        g_Camera.mouseInput(x,y,Button,State);
+    if(State == GLUT_DOWN){
+        if(zoom == 0 && doubleClick == 0){
+            g_MouseButton = GLUT_MIDDLE_BUTTON;
+            g_MouseState = GLUT_DOWN;
+            g_Camera.mouseInput(x, 1200, g_MouseButton, g_MouseState);
+            
+        }
     }
     //Auswahl des aktiven Objektes
     if (State == GLUT_UP) {
+        if(doubleClick == 0){
+            //Kamera auf Objekt zoomen
+            g_MouseButton = GLUT_MIDDLE_BUTTON;
+            g_Camera.setPosition(rayOrigin);
+            g_Camera.setTarget(worldDirection);
+        }
+        doubleClick = 0;
+        glutTimerFunc(300, setDoubleClick, 1);
         calcMouseRay(x, y);
         scene.setActiveObject();
         resetVectors();
     }
 }
 
+/*
+ Methode zur Kamerarotation über die Mausposition.
+ Parameter: x - X-Position des Mauszeigers
+            y - Y-Position des Mauszeigers
+ */
 void MouseMoveCallback( int x, int y)
 {
     if (rotation){
@@ -283,7 +308,10 @@ void MouseMoveCallback( int x, int y)
     g_Camera.mouseInput(x,y,g_MouseButton,g_MouseState);
 }
 
-//Transformationsmatrix aktualisieren
+/*
+ Methode zur Aktualisierung der Objektdaten des aktuellen Objektes
+ Parameter: i - Zähler des ausgewählten Objektes
+ */
 void updateActiveObject(int i){
     Vector newScaling = Vector(scaling.X * scalingFactor,scaling.Y * scalingFactor, scaling.Z* scalingFactor);
     scene.objects.at(i).setTranslation(translation);
@@ -292,14 +320,20 @@ void updateActiveObject(int i){
     scene.objects.at(i).update();
 }
 
-//Objekte an die richtige Stelle positionieren
+/*
+ Methode zur Positionierung der Objekte an Ausgangsposition.
+ */
 void initObjects(){
     for(Object& tmp : scene.objects){
         tmp.update();
     }
 }
 
-//Mausposition in Vektor umwandeln (gibt nur einen Punkt der x,y Ebene zurück)
+/*
+ Methode zum Umrechnung der Mausposition in Ursprungsvektor und Richtungsvektor
+ Parameter: mouseX - X-Position des Mauszeigers
+            mouseY - Y-Position des Mauszeigers
+ */
 void calcMouseRay(int mouseX, int mouseY) {
     // Umrechnung des Mauszeigers in den normalisierten Bildraum
     float viewportX = (2.0f/g_WindowWidth) * (mouseX - (g_WindowWidth*0.5));
@@ -318,4 +352,14 @@ void calcMouseRay(int mouseX, int mouseY) {
     rayOrigin = invertViewMatrix.translation();
 }
 
+/*
+ Set-Methoden zur Entscheidung eines Doppelklicks.
+ */
+void setDoubleClick(int dClick){
+    doubleClick = dClick;
+}
+
+void setZoom(int z){
+    zoom = z;
+}
 

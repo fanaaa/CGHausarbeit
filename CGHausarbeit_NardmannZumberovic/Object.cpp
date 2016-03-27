@@ -6,6 +6,12 @@
 //  Collaborator: Philipp Nardmann
 //  Copyright © 2015 HochschuleOsnabrueck. All rights reserved.
 //
+
+
+/*
+ Klasse zum Einlesen, speichern und Darstellen eines Objektes aus einer .obj-Datei.
+ Die Geometriedaten werden VBO gespeichert und Transformationen, über eigens verwaltete Transformationsmatrix realisiert.
+ */
 #define BUFFER_OFFSET(i) ((char *)NULL + (i)) // Kein Off-Set; alle Vektoren werden gezeichnet
 
 using namespace std;
@@ -22,6 +28,9 @@ using namespace std;
 #include <cstdio>
 #include <string>
 
+/*
+ Hilfsklasse Vertex, zum Abspeichern der Vektoren und zugehörigen Normalen der Obj-Vertices.
+ */
 Vertex::Vertex(){}
 
 Vertex::Vertex( const Vector& p, const Vector& n, float u, float v){
@@ -36,10 +45,21 @@ Object::Object() : name(new char[256]), parentName(new char[256]), fileName(new 
     this->isActiveObject = false;
 
 }
-
+/*
+ Destruktor
+ */
 Object::~Object(){
 }
 
+/*
+ Methode zum Parsen der .obj-Datei
+ Parameter: Filename        - Dateiname der zu ladenden Obj-Datei
+            translation     - Translationsvektor zum Darstellen der Ausgangsposition; eingelesen aus Szenendatei
+            scaling         - Skalierungsvektor ""
+            rotationVector  - Rotationsvektor ""
+            rotationAngle   - Rotationsgrad ""
+ 
+ */
 bool Object::load(const char *Filename, Vector translation, Vector scaling, Vector rotationVector, float rotationAngle){
     
     this->translation = translation;
@@ -67,6 +87,7 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
     unsigned int pidx[4];
     unsigned int tidx[4];
     FILE * object = fopen(Filename, "r");
+    
     if(object == NULL){
         cout << " Konnte Datei nicht oeffnen!" << endl;
         cout << getcwd(NULL, 0) << endl;
@@ -97,6 +118,7 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
                     Vector tmp4;
                     int match = fscanf(object, "%d/%d %d/%d %d/%d %d/%d", &pidx[0],&tidx[0],&pidx[1],&tidx[1],&pidx[2],&tidx[2],&pidx[3],&tidx[3]);
                     
+    
                     //Texturkoordinaten speichern
                     if(match == 6){
                         indexBuffer.push_back(pidx[0]-1);
@@ -121,7 +143,7 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
         }
         
         
-        m_Indices = indexBuffer;
+        this->m_Indices = indexBuffer;
         
         //Normale berechnen
         Vector normal;
@@ -129,9 +151,9 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
             normal = (m_Vertices.at(indexBuffer[3*i+1]).Position - m_Vertices.at(indexBuffer[3*i]).Position).cross(m_Vertices.at(indexBuffer[3*i+2]).Position - m_Vertices.at(indexBuffer[3*i]).Position);
             
             normal.normalize();
-            m_Vertices[indexBuffer[3*i]].Normal = normal;
-            m_Vertices[indexBuffer[3*i+1]].Normal = normal;
-            m_Vertices[indexBuffer[3*i+2]].Normal = normal;
+            this->m_Vertices[indexBuffer[3*i]].Normal = normal;
+            this->m_Vertices[indexBuffer[3*i+1]].Normal = normal;
+            this->m_Vertices[indexBuffer[3*i+2]].Normal = normal;
             
         }
         
@@ -141,19 +163,16 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
         this->createBoundingBox(m_Vertices);
         float scale = 5 / ((m_Box.Min - m_Box.Max).length());
         for(int i = 0; i < m_Vertices.size(); i++){
-            m_Vertices[i].Position = m_Vertices[i].Position * scale;
+            this->m_Vertices[i].Position = m_Vertices[i].Position * scale;
         }
         
         
         this->indexSize = indexBuffer.size();
         
+        //VBO erstellen
         glGenBuffers( 1, &m_vertexBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*m_Vertices.size(), &m_Vertices[0], GL_STATIC_DRAW );
-        
-        glGenBuffers(1, &m_colorBuffer);
-        glBindBuffer(GL_COLOR_ARRAY, m_colorBuffer);
-        glBufferData(GL_COLOR_ARRAY, sizeof(Color)*m_Vertices.size(), &m_color[0], GL_STATIC_DRAW);
         
         glGenBuffers( 1, &m_indexBuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
@@ -164,6 +183,10 @@ bool Object::load(const char *Filename, Vector translation, Vector scaling, Vect
     
 }
 
+/*
+ Methode zum Übergeben der Transformationsmatrix an OpenGl.
+ Objekt wird auf eigenen Matrix-Stack gepusht.
+ */
 void Object::vDraw(){
     glPushMatrix();
     glMultMatrixf(this->m_transMatrix);
@@ -171,11 +194,10 @@ void Object::vDraw(){
     glPopMatrix();
 }
 
-
+/*
+ Methode zum Zeichnen der Objektdaten in OpenGL mit erstellten Bufferobjekten.
+ */
 void Object::draw(){
-
-
-    
     // inform the client that we want to use array buffers
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
@@ -192,7 +214,7 @@ void Object::draw(){
     if(this->isActiveObject){
         glDrawElements(GL_LINES, this->indexSize, GL_UNSIGNED_INT, BUFFER_OFFSET(0));
     }else {
-        glDrawElements( GL_TRIANGLES, this->indexSize , GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
+        glDrawElements(GL_TRIANGLES, this->indexSize , GL_UNSIGNED_INT, BUFFER_OFFSET(0) );
     }
     
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -202,26 +224,32 @@ void Object::draw(){
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+/*
+ Methode zum Erstellen der Boundingbox, die das Objekt in den Raum skaliert.
+ Parameter: vertices - std::vector mit Vertices zur Ermittlung der Minima und Maxima.
+ */
 void Object::createBoundingBox(std::vector<Vertex> vertices){
-    m_Box.Max.X = m_Box.Min.X = vertices[0].Position.X;
-    m_Box.Max.Y = m_Box.Min.Y = vertices[0].Position.Y;
-    m_Box.Max.Z = m_Box.Min.Z = vertices[0].Position.Z;
+    this->m_Box.Max.X = this->m_Box.Min.X = vertices[0].Position.X;
+    this->m_Box.Max.Y = this->m_Box.Min.Y = vertices[0].Position.Y;
+    this->m_Box.Max.Z = this->m_Box.Min.Z = vertices[0].Position.Z;
     
     for(int i = 0; i < vertices.size(); i++) {
         Vector vertex = vertices[i].Position;
         
-        if(m_Box.Min.X < vertex.X) m_Box.Min.X = vertex.X;
-        if(m_Box.Min.Y < vertex.Y) m_Box.Min.Y = vertex.Y;
-        if(m_Box.Min.Z < vertex.Z) m_Box.Min.Z = vertex.Z;
+        if(this->m_Box.Min.X < vertex.X) this->m_Box.Min.X = vertex.X;
+        if(this->m_Box.Min.Y < vertex.Y) this->m_Box.Min.Y = vertex.Y;
+        if(this->m_Box.Min.Z < vertex.Z) this->m_Box.Min.Z = vertex.Z;
         
-        if(m_Box.Max.X > vertex.X) m_Box.Max.X = vertex.X;
-        if(m_Box.Max.Y > vertex.Y) m_Box.Max.Y = vertex.Y;
-        if(m_Box.Max.Z > vertex.Z) m_Box.Max.Z = vertex.Z;
+        if(this->m_Box.Max.X > vertex.X) this->m_Box.Max.X = vertex.X;
+        if(this->m_Box.Max.Y > vertex.Y) this->m_Box.Max.Y = vertex.Y;
+        if(this->m_Box.Max.Z > vertex.Z) this->m_Box.Max.Z = vertex.Z;
     }
 }
 
+/*
+ Methode zur Aktualisierung der Objektposition.
+ */
 void Object::update(){
-    
     //Translate,Rotate,Scale
     Matrix TM;
     Matrix SM;
@@ -238,20 +266,22 @@ void Object::update(){
     this->m_transMatrix =  TM * SM * RM;
 }
 
-//Überprüfen eines geklickten Objetkes über Triangle-Intersection
+/*
+ Methode zur Überprüfung auf einen Mausklick des Objektes.
+ */
 bool Object::objectIsClicked(){
     for (int i = 0; i <  this->m_Indices.size()/ 3 ; i++) {
    
-        Vector a = m_Vertices.at(m_Indices[3*i]).Position;
-        Vector b = m_Vertices.at(m_Indices[3*i+1]).Position;
-        Vector c = m_Vertices.at(m_Indices[3*i+2]).Position;
+        Vector a = this->m_Vertices.at(this->m_Indices[3*i]).Position;
+        Vector b = this->m_Vertices.at(this->m_Indices[3*i+1]).Position;
+        Vector c = this->m_Vertices.at(this->m_Indices[3*i+2]).Position;
         
         //Transformationsmatrix anwenden
-        a = m_transMatrix * a;
-        b = m_transMatrix * b;
-        c = m_transMatrix * c;
+        a = this->m_transMatrix * a;
+        b = this->m_transMatrix * b;
+        c = this->m_transMatrix * c;
 
-         float s;
+        float s;
         if (rayOrigin.triangleIntersection(worldDirection, a, b, c, s)) {
             return true;
         }
@@ -259,7 +289,9 @@ bool Object::objectIsClicked(){
     return false;
 }
 
-//setter
+/*
+ Set-Methoden
+ */
 void Object::setRotation(Vector &rotationVector, float rotationAngle){
     this->rotationVector = rotationVector;
     this->rotationAngle = rotationAngle;
@@ -293,7 +325,9 @@ void Object::setActive(bool boolean){
     this->isActiveObject = boolean;
 }
 
-//getter
+/*
+ Get-Methoden
+ */
 Vector& Object::getTranslation(){
     return this->translation;
 }
