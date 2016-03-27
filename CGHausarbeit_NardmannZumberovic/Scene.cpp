@@ -241,6 +241,7 @@ void Scene::writeObjectTransformations(FILE *file, Object obj){
     strcat(scaling, "\n");
     //Dateiname
     strcat(fileName, "model ");
+    strcat(fileName, "Objekte/");
     strcat(fileName, obj.getName());
     strcat(fileName, ".obj");
     strcat(fileName, "\n");
